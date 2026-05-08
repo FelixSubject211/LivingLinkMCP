@@ -1,11 +1,10 @@
 package com.felix.livinglink
 
-import com.felix.livinglink.mcp.LivingLinkMcpServer
+import com.felix.livinglink.di.livingLinkModule
 import com.felix.livinglink.mcp.McpRunner
-import com.felix.livinglink.shoppingList.application.AddShoppingListItemUseCase
-import com.felix.livinglink.shoppingList.application.CompleteShoppingListItemUseCase
-import com.felix.livinglink.shoppingList.application.ListShoppingListItemsUseCase
-import com.felix.livinglink.shoppingList.infrastructure.InMemoryShoppingItemRepository
+import io.modelcontextprotocol.kotlin.sdk.server.Server
+import org.koin.core.context.startKoin
+import org.koin.java.KoinJavaComponent.getKoin
 
 suspend fun main() {
     System.setProperty(
@@ -13,14 +12,11 @@ suspend fun main() {
         "false",
     )
 
-    val shoppingItemRepository = InMemoryShoppingItemRepository()
+    startKoin {
+        modules(livingLinkModule)
+    }
 
-    val server =
-        LivingLinkMcpServer.create(
-            addShoppingListItemUseCase = AddShoppingListItemUseCase(shoppingItemRepository),
-            completeShoppingListItemUseCase = CompleteShoppingListItemUseCase(shoppingItemRepository),
-            listShoppingListItemsUseCase = ListShoppingListItemsUseCase(shoppingItemRepository),
-        )
+    val server = getKoin().get<Server>()
 
     McpRunner.run(server)
 }

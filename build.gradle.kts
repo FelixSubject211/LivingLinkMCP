@@ -22,5 +22,6 @@ ktlint {
 dependencies {
     implementation(libs.mcp.kotlin.sdk.server)
     implementation(libs.logback.classic)
+    implementation(libs.koin.core)
     testImplementation(libs.kotlin.test)
 }
