@@ -20,11 +20,7 @@ class InMemoryShoppingItemRepository : CrudRepository<ShoppingListItem> {
         return entity
     }
 
-    override suspend fun findById(id: String): ShoppingListItem? {
-        return items[id]
-    }
+    override suspend fun findById(id: String): ShoppingListItem? = items[id]
 
-    override suspend fun findAll(): List<ShoppingListItem> {
-        return items.values.toList()
-    }
+    override suspend fun findAll(): List<ShoppingListItem> = items.values.toList()
 }

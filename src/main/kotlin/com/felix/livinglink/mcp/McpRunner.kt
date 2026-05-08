@@ -9,10 +9,11 @@ import kotlinx.io.buffered
 
 object McpRunner {
     suspend fun run(server: Server) {
-        val transport = StdioServerTransport(
-            inputStream = System.`in`.asSource().buffered(),
-            outputStream = System.out.asSink().buffered()
-        )
+        val transport =
+            StdioServerTransport(
+                inputStream = System.`in`.asSource().buffered(),
+                outputStream = System.out.asSink().buffered(),
+            )
 
         server.createSession(transport)
 

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ktlint)
     application
 }
 
@@ -12,6 +13,10 @@ application {
 
 kotlin {
     jvmToolchain(21)
+}
+
+ktlint {
+    version.set("1.6.0")
 }
 
 dependencies {

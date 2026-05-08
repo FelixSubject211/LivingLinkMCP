@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class ShoppingListItem(
     val id: String,
     val name: String,
-    val completed: Boolean
+    val completed: Boolean,
 )

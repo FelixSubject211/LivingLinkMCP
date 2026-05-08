@@ -4,7 +4,7 @@ import com.felix.livinglink.common.CrudRepository
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 
 class CompleteShoppingListItemUseCase(
-    private val repository: CrudRepository<ShoppingListItem>
+    private val repository: CrudRepository<ShoppingListItem>,
 ) {
     suspend operator fun invoke(id: String): ShoppingListItem? {
         val item = repository.findById(id) ?: return null

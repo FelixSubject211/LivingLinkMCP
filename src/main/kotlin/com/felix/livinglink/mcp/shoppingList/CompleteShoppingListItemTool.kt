@@ -10,32 +10,42 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
 fun Server.registerCompleteShoppingListItemTool(
-    completeShoppingListItemUseCase: CompleteShoppingListItemUseCase
+    completeShoppingListItemUseCase: CompleteShoppingListItemUseCase,
 ) {
     addTool(
         name = "complete_shopping_list_item",
         description = "Marks a shopping list item as completed.",
-        inputSchema = ToolSchema(
-            properties = buildJsonObject {
-                put("id", buildJsonObject {
-                    put("type", "string")
-                    put("description", "ID of the item.")
-                })
-            },
-            required = listOf("id")
-        )
+        inputSchema =
+            ToolSchema(
+                properties =
+                    buildJsonObject {
+                        put(
+                            "id",
+                            buildJsonObject {
+                                put("type", "string")
+                                put("description", "ID of the item.")
+                            },
+                        )
+                    },
+                required = listOf("id"),
+            ),
     ) { request ->
-        val id = request.params.arguments?.get("id")?.jsonPrimitive?.content.orEmpty()
+        val id =
+            request.params.arguments
+                ?.get("id")
+                ?.jsonPrimitive
+                ?.content
+                .orEmpty()
         val item = completeShoppingListItemUseCase(id)
 
         if (item == null) {
             CallToolResult(
                 content = listOf(TextContent("Item with id '$id' not found.")),
-                isError = true
+                isError = true,
             )
         } else {
             CallToolResult(
-                content = listOf(TextContent("Completed '${item.name}'."))
+                content = listOf(TextContent("Completed '${item.name}'.")),
             )
         }
     }

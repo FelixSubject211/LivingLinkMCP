@@ -10,16 +10,17 @@ import com.felix.livinglink.shoppingList.infrastructure.InMemoryShoppingItemRepo
 suspend fun main() {
     System.setProperty(
         "kotlin.logging.internal.platform.kotlinLoggingStartupMessageEnabled",
-        "false"
+        "false",
     )
 
     val shoppingItemRepository = InMemoryShoppingItemRepository()
 
-    val server = LivingLinkMcpServer.create(
-        addShoppingListItemUseCase = AddShoppingListItemUseCase(shoppingItemRepository),
-        completeShoppingListItemUseCase = CompleteShoppingListItemUseCase(shoppingItemRepository),
-        listShoppingListItemsUseCase = ListShoppingListItemsUseCase(shoppingItemRepository)
-    )
+    val server =
+        LivingLinkMcpServer.create(
+            addShoppingListItemUseCase = AddShoppingListItemUseCase(shoppingItemRepository),
+            completeShoppingListItemUseCase = CompleteShoppingListItemUseCase(shoppingItemRepository),
+            listShoppingListItemsUseCase = ListShoppingListItemsUseCase(shoppingItemRepository),
+        )
 
     McpRunner.run(server)
 }

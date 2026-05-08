@@ -15,22 +15,24 @@ object LivingLinkMcpServer {
     fun create(
         addShoppingListItemUseCase: AddShoppingListItemUseCase,
         completeShoppingListItemUseCase: CompleteShoppingListItemUseCase,
-        listShoppingListItemsUseCase: ListShoppingListItemsUseCase
-    ): Server {
-        return Server(
-            serverInfo = Implementation(
-                name = "livinglink",
-                version = "0.1.0"
-            ),
-            options = ServerOptions(
-                capabilities = ServerCapabilities(
-                    tools = ServerCapabilities.Tools(listChanged = true)
-                )
-            )
+        listShoppingListItemsUseCase: ListShoppingListItemsUseCase,
+    ): Server =
+        Server(
+            serverInfo =
+                Implementation(
+                    name = "livinglink",
+                    version = "0.1.0",
+                ),
+            options =
+                ServerOptions(
+                    capabilities =
+                        ServerCapabilities(
+                            tools = ServerCapabilities.Tools(listChanged = true),
+                        ),
+                ),
         ).apply {
             registerAddShoppingListItemTool(addShoppingListItemUseCase)
             registerCompleteShoppingListItemTool(completeShoppingListItemUseCase)
             registerListShoppingListItemsTool(listShoppingListItemsUseCase)
         }
-    }
 }

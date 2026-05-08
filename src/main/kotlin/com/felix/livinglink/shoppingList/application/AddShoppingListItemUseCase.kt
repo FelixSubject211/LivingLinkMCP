@@ -5,14 +5,15 @@ import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import java.util.UUID
 
 class AddShoppingListItemUseCase(
-    private val repository: CrudRepository<ShoppingListItem>
+    private val repository: CrudRepository<ShoppingListItem>,
 ) {
     suspend operator fun invoke(name: String): ShoppingListItem {
-        val item = ShoppingListItem(
-            id = UUID.randomUUID().toString(),
-            name = name.trim(),
-            completed = false
-        )
+        val item =
+            ShoppingListItem(
+                id = UUID.randomUUID().toString(),
+                name = name.trim(),
+                completed = false,
+            )
 
         return repository.create(item)
     }

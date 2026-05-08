@@ -10,26 +10,36 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
 fun Server.registerAddShoppingListItemTool(
-    addShoppingListItemUseCase: AddShoppingListItemUseCase
+    addShoppingListItemUseCase: AddShoppingListItemUseCase,
 ) {
     addTool(
         name = "add_shopping_list_item",
         description = "Adds an item to the shopping list.",
-        inputSchema = ToolSchema(
-            properties = buildJsonObject {
-                put("name", buildJsonObject {
-                    put("type", "string")
-                    put("description", "Name of the item.")
-                })
-            },
-            required = listOf("name")
-        )
+        inputSchema =
+            ToolSchema(
+                properties =
+                    buildJsonObject {
+                        put(
+                            "name",
+                            buildJsonObject {
+                                put("type", "string")
+                                put("description", "Name of the item.")
+                            },
+                        )
+                    },
+                required = listOf("name"),
+            ),
     ) { request ->
-        val name = request.params.arguments?.get("name")?.jsonPrimitive?.content.orEmpty()
+        val name =
+            request.params.arguments
+                ?.get("name")
+                ?.jsonPrimitive
+                ?.content
+                .orEmpty()
         val item = addShoppingListItemUseCase(name)
 
         CallToolResult(
-            content = listOf(TextContent("Added '${item.name}' with id '${item.id}'."))
+            content = listOf(TextContent("Added '${item.name}' with id '${item.id}'.")),
         )
     }
 }

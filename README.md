@@ -17,14 +17,24 @@ projectDir=/absolute/path/to/livinglink
 ~/Library/Application Support/Claude/claude_desktop_config.json
 
 {
-"mcpServers": {
-"livinglink": {
-"command": "/absolute/path/to/livinglink/run-claude-mcp.sh"
-}
-}
+    "mcpServers": {
+        "livinglink": {
+            "command": "/absolute/path/to/livinglink/run-claude-mcp.sh"
+        }
+    }
 }
 
 ## After changes
 
 ./gradlew installDist
 pkill Claude
+
+## Lint
+
+Check formatting:
+
+./gradlew ktlintCheck
+
+Auto-format:
+
+./gradlew ktlintFormat
