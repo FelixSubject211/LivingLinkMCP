@@ -7,7 +7,7 @@ group = "com.felix"
 version = "1.0.0-SNAPSHOT"
 
 application {
-    mainClass = "com.felix.LivingLinkMcpMainKt"
+    mainClass = "com.felix.livinglink.LivingLinkMcpMainKt"
 }
 
 kotlin {
