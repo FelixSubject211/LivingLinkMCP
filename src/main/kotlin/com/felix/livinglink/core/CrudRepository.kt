@@ -1,9 +1,9 @@
-package com.felix.livinglink.common
+package com.felix.livinglink.core
 
 interface CrudRepository<T> {
-    suspend fun create(entity: T): T
+    suspend fun create(value: T): T
 
-    suspend fun update(entity: T): T?
+    suspend fun update(value: T): T?
 
     suspend fun findById(id: String): T?
 

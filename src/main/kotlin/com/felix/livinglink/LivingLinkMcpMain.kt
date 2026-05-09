@@ -1,10 +1,9 @@
 package com.felix.livinglink
 
-import com.felix.livinglink.di.livingLinkModule
-import com.felix.livinglink.mcp.McpRunner
-import io.modelcontextprotocol.kotlin.sdk.server.Server
-import org.koin.core.context.startKoin
+import com.felix.livinglink.di.LivingLinkApplication
+import com.felix.livinglink.mcp.McpServerRunner
 import org.koin.java.KoinJavaComponent.getKoin
+import org.koin.plugin.module.dsl.startKoin
 
 suspend fun main() {
     System.setProperty(
@@ -12,11 +11,9 @@ suspend fun main() {
         "false",
     )
 
-    startKoin {
-        modules(livingLinkModule)
-    }
+    startKoin<LivingLinkApplication>()
 
-    val server = getKoin().get<Server>()
+    val runner = getKoin().get<McpServerRunner>()
 
-    McpRunner.run(server)
+    runner.run()
 }

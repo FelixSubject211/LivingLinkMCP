@@ -1,15 +1,16 @@
 package com.felix.livinglink.shoppingList.application
 
-import com.felix.livinglink.common.CrudRepository
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
+import org.koin.core.annotation.Single
 
+@Single
 class CompleteShoppingListItemUseCase(
-    private val repository: CrudRepository<ShoppingListItem>,
+    private val shoppingListItemRepository: ShoppingListItemRepository,
 ) {
     suspend operator fun invoke(id: String): ShoppingListItem? {
-        val item = repository.findById(id) ?: return null
-        val completedItem = item.copy(completed = true)
+        val item = shoppingListItemRepository.findById(id) ?: return null
 
-        return repository.update(completedItem)
+        return shoppingListItemRepository.update(item.complete())
     }
 }

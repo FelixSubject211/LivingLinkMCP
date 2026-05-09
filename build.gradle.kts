@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.koin.compiler)
     application
 }
 
@@ -23,5 +24,7 @@ dependencies {
     implementation(libs.mcp.kotlin.sdk.server)
     implementation(libs.logback.classic)
     implementation(libs.koin.core)
+    implementation(libs.koin.annotations)
+
     testImplementation(libs.kotlin.test)
 }

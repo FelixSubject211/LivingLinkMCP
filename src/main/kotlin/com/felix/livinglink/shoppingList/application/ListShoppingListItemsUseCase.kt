@@ -1,10 +1,13 @@
 package com.felix.livinglink.shoppingList.application
 
-import com.felix.livinglink.common.CrudRepository
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
+import org.koin.core.annotation.Single
 
+@Single
 class ListShoppingListItemsUseCase(
-    private val repository: CrudRepository<ShoppingListItem>,
+    private val shoppingListItemRepository: ShoppingListItemRepository,
 ) {
-    suspend operator fun invoke(): List<ShoppingListItem> = repository.findAll()
+    suspend operator fun invoke(): List<ShoppingListItem> =
+        shoppingListItemRepository.findAll()
 }
