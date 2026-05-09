@@ -120,7 +120,7 @@ class ListShoppingListItemsTool(
             "updatedAt" to "desc" -> ShoppingListItemSort.UpdatedAtDescending
             "name" to "asc" -> ShoppingListItemSort.NameAscending
             "name" to "desc" -> ShoppingListItemSort.NameDescending
-            else -> ShoppingListItemSort.CreatedAtDescending
+            else -> error("Unsupported sort: sortBy=$sortBy, sortDirection=$sortDirection.")
         }
     }
 
