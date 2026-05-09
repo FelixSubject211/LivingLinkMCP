@@ -21,6 +21,10 @@ class MongoClientProvider(
     fun database(): MongoDatabase =
         client.getDatabase(mongoSettings.databaseName)
 
+    fun close() {
+        client.close()
+    }
+
     private fun clientSettings(): MongoClientSettings {
         val codecRegistry =
             fromRegistries(
