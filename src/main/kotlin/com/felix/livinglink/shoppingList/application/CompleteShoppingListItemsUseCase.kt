@@ -1,13 +1,14 @@
 package com.felix.livinglink.shoppingList.application
 
+import com.felix.livinglink.core.TimeProvider
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
 import org.koin.core.annotation.Single
-import kotlin.time.Clock
 
 @Single
 class CompleteShoppingListItemsUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
+    private val timeProvider: TimeProvider,
 ) {
     suspend operator fun invoke(ids: List<String>): Result {
         val cleanedIds =
@@ -22,7 +23,7 @@ class CompleteShoppingListItemsUseCase(
             "At least one shopping list item id is required."
         }
 
-        val now = Clock.System.now()
+        val now = timeProvider()
 
         return cleanedIds.fold(Result()) { result, id ->
             val item = shoppingListItemRepository.findById(id) ?: return@fold result.withMissingId(id)

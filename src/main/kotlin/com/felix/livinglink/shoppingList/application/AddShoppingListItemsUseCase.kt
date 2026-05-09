@@ -1,14 +1,16 @@
 package com.felix.livinglink.shoppingList.application
 
+import com.felix.livinglink.core.TimeProvider
+import com.felix.livinglink.core.UuidGenerator
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
 import org.koin.core.annotation.Single
-import java.util.UUID
-import kotlin.time.Clock
 
 @Single
 class AddShoppingListItemsUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
+    private val uuidGenerator: UuidGenerator,
+    private val timeProvider: TimeProvider,
 ) {
     suspend operator fun invoke(names: List<String>): List<ShoppingListItem> {
         val cleanedNames =
@@ -23,12 +25,12 @@ class AddShoppingListItemsUseCase(
             "At least one shopping list item name is required."
         }
 
-        val now = Clock.System.now()
+        val now = timeProvider()
 
         return cleanedNames.map { name ->
             shoppingListItemRepository.create(
                 ShoppingListItem(
-                    id = UUID.randomUUID().toString(),
+                    id = uuidGenerator(),
                     name = name,
                     completed = false,
                     createdAt = now,
