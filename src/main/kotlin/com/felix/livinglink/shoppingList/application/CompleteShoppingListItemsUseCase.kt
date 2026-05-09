@@ -3,6 +3,7 @@ package com.felix.livinglink.shoppingList.application
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
 import org.koin.core.annotation.Single
+import kotlin.time.Clock
 
 @Single
 class CompleteShoppingListItemsUseCase(
@@ -21,18 +22,16 @@ class CompleteShoppingListItemsUseCase(
             "At least one shopping list item id is required."
         }
 
-        return cleanedIds.fold(Result()) { result, id ->
-            val item = shoppingListItemRepository.findById(id)
+        val now = Clock.System.now()
 
-            if (item == null) {
-                return@fold result.withMissingId(id)
-            }
+        return cleanedIds.fold(Result()) { result, id ->
+            val item = shoppingListItemRepository.findById(id) ?: return@fold result.withMissingId(id)
 
             if (item.completed) {
                 return@fold result.withAlreadyCompletedItem(item)
             }
 
-            val completedItem = shoppingListItemRepository.update(item.complete())
+            val completedItem = shoppingListItemRepository.update(item.complete(now))
 
             if (completedItem == null) {
                 result.withMissingId(id)

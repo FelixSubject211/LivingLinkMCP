@@ -4,6 +4,7 @@ import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
 import org.koin.core.annotation.Single
 import java.util.UUID
+import kotlin.time.Clock
 
 @Single
 class AddShoppingListItemsUseCase(
@@ -22,12 +23,16 @@ class AddShoppingListItemsUseCase(
             "At least one shopping list item name is required."
         }
 
+        val now = Clock.System.now()
+
         return cleanedNames.map { name ->
             shoppingListItemRepository.create(
                 ShoppingListItem(
                     id = UUID.randomUUID().toString(),
                     name = name,
                     completed = false,
+                    createdAt = now,
+                    updatedAt = now,
                 ),
             )
         }

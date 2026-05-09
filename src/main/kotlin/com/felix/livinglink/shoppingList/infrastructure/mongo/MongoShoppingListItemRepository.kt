@@ -2,25 +2,53 @@ package com.felix.livinglink.shoppingList.infrastructure.mongo
 
 import com.felix.livinglink.core.CrudRepository
 import com.felix.livinglink.core.MappedCrudRepository
-import com.felix.livinglink.infrastructure.mongo.MongoClientProvider
 import com.felix.livinglink.infrastructure.mongo.MongoCrudRepository
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
+import com.felix.livinglink.shoppingList.domain.ShoppingListItemSort
+import com.mongodb.client.model.Filters
+import com.mongodb.client.model.Sorts
+import com.mongodb.kotlin.client.coroutine.MongoCollection
+import kotlinx.coroutines.flow.toList
 import org.koin.core.annotation.Single
 
 @Single(binds = [ShoppingListItemRepository::class])
 class MongoShoppingListItemRepository(
-    mongoClientProvider: MongoClientProvider,
+    private val collection: MongoCollection<MongoShoppingListItemDocument>,
 ) : ShoppingListItemRepository,
     CrudRepository<ShoppingListItem> by MappedCrudRepository(
         storageRepository =
             MongoCrudRepository(
-                collection =
-                    mongoClientProvider
-                        .database()
-                        .getCollection<MongoShoppingListItemDocument>("shopping_list_items"),
+                collection = collection,
                 entityName = "Shopping list item",
             ),
         toStorage = MongoShoppingListItemDocument::fromDomain,
         toDomain = MongoShoppingListItemDocument::toDomain,
-    )
+    ) {
+    override suspend fun find(query: ShoppingListItemQuery): List<ShoppingListItem> {
+        val filter =
+            query.completed?.let { completed ->
+                Filters.eq("completed", completed)
+            } ?: Filters.empty()
+
+        val sort =
+            when (query.sort) {
+                ShoppingListItemSort.CreatedAtAscending -> Sorts.ascending("createdAt")
+                ShoppingListItemSort.CreatedAtDescending -> Sorts.descending("createdAt")
+                ShoppingListItemSort.UpdatedAtAscending -> Sorts.ascending("updatedAt")
+                ShoppingListItemSort.UpdatedAtDescending -> Sorts.descending("updatedAt")
+                ShoppingListItemSort.NameAscending -> Sorts.ascending("name")
+                ShoppingListItemSort.NameDescending -> Sorts.descending("name")
+            }
+
+        return collection
+            .find(filter)
+            .sort(sort)
+            .limit(query.limit)
+            .toList()
+            .map { document ->
+                document.toDomain()
+            }
+    }
+}
