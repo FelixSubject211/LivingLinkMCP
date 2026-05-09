@@ -1,10 +1,9 @@
 package com.felix.livinglink.shoppingList.infrastructure.mcp
 
 import com.felix.livinglink.infrastructure.mcp.McpToolRegistrar
+import com.felix.livinglink.infrastructure.mcp.toolSuccess
 import com.felix.livinglink.shoppingList.application.ListShoppingListItemsUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
-import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
-import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import org.koin.core.annotation.Single
 
@@ -30,7 +29,7 @@ class ListShoppingListItemsTool(
                     }
                 }
 
-            CallToolResult(content = listOf(TextContent(text)))
+            toolSuccess(text)
         }
     }
 }
