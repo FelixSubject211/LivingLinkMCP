@@ -1,6 +1,6 @@
-package com.felix.livinglink.shoppingList.mcp
+package com.felix.livinglink.shoppingList.infrastructure.mcp
 
-import com.felix.livinglink.mcp.McpToolRegistrar
+import com.felix.livinglink.infrastructure.mcp.McpToolRegistrar
 import com.felix.livinglink.shoppingList.application.CompleteShoppingListItemUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult

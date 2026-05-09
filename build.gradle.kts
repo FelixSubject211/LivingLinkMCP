@@ -25,6 +25,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.koin.core)
     implementation(libs.koin.annotations)
+    implementation(libs.mongodb.driver.kotlin.coroutine)
 
     testImplementation(libs.kotlin.test)
 }

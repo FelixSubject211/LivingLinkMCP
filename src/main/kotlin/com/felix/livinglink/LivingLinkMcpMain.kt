@@ -1,7 +1,7 @@
 package com.felix.livinglink
 
-import com.felix.livinglink.di.LivingLinkApplication
-import com.felix.livinglink.mcp.McpServerRunner
+import com.felix.livinglink.core.LivingLinkApplication
+import com.felix.livinglink.infrastructure.mcp.McpServerRunner
 import org.koin.java.KoinJavaComponent.getKoin
 import org.koin.plugin.module.dsl.startKoin
 

@@ -7,6 +7,7 @@ data class ShoppingListItem(
     val id: String,
     val name: String,
     val completed: Boolean,
+    val version: Long = 0,
 ) {
     fun complete(): ShoppingListItem =
         copy(completed = true)

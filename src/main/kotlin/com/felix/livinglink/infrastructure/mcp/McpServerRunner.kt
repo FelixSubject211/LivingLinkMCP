@@ -1,4 +1,4 @@
-package com.felix.livinglink.mcp
+package com.felix.livinglink.infrastructure.mcp
 
 import kotlinx.coroutines.Job
 import org.koin.core.annotation.Single
