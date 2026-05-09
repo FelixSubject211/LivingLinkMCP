@@ -1,21 +1,48 @@
 # livinglink
 
-Local Kotlin MCP server for Claude.
+Kotlin MCP server.
+
+## Requirements
+
+- JDK
+- Docker
+- Docker Compose
+
+## MongoDB
+
+Start MongoDB and Mongo Express:
+
+```bash
+docker compose up -d
+```
 
 ## Build
 
+```bash
 ./gradlew installDist
+```
 
 ## local.properties
 
 Add your local project path:
 
+```properties
 projectDir=/absolute/path/to/livinglink
+```
 
 ## Claude Desktop config
 
-~/Library/Application Support/Claude/claude_desktop_config.json
+### macOS
 
+Edit:
+
+```text
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+Example:
+
+```json
 {
     "mcpServers": {
         "livinglink": {
@@ -23,18 +50,26 @@ projectDir=/absolute/path/to/livinglink
         }
     }
 }
+```
 
 ## After changes
 
+Rebuild the distribution:
+
+```bash
 ./gradlew installDist
-pkill Claude
+```
 
 ## Lint
 
 Check formatting:
 
+```bash
 ./gradlew ktlintCheck
+```
 
 Auto-format:
 
+```bash
 ./gradlew ktlintFormat
+```
