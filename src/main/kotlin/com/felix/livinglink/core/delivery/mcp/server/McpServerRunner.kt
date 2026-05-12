@@ -1,4 +1,4 @@
-package com.felix.livinglink.core.delivery.mcp
+package com.felix.livinglink.core.delivery.mcp.server
 
 import com.felix.livinglink.core.database.mongo.MongoClientProvider
 import kotlinx.coroutines.Job

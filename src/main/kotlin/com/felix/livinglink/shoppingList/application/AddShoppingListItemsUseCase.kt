@@ -21,10 +21,6 @@ class AddShoppingListItemsUseCase(
                     name.isNotBlank()
                 }.distinct()
 
-        require(cleanedNames.isNotEmpty()) {
-            "At least one shopping list item name is required."
-        }
-
         val now = timeProvider()
 
         return cleanedNames.map { name ->

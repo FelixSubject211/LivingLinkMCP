@@ -19,10 +19,6 @@ class CompleteShoppingListItemsUseCase(
                     id.isNotBlank()
                 }.distinct()
 
-        require(cleanedIds.isNotEmpty()) {
-            "At least one shopping list item id is required."
-        }
-
         val now = timeProvider()
 
         return cleanedIds.fold(Result()) { result, id ->
