@@ -1,91 +1,88 @@
 package com.felix.livinglink.core.delivery.mcp.dsl
 
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
-
 sealed class McpToolParameter<T>(
+    val name: String,
     val description: String,
     val required: Boolean,
-) : ReadOnlyProperty<Any?, McpToolParameter<T>> {
-    lateinit var name: String
-        private set
-
-    override fun getValue(
-        thisRef: Any?,
-        property: KProperty<*>,
-    ): McpToolParameter<T> {
-        if (!::name.isInitialized) {
-            name = property.name
-        }
-
-        return this
-    }
-
-    fun hasName(): Boolean =
-        ::name.isInitialized
-
+) {
     class RequiredStringList(
+        name: String,
         description: String,
     ) : McpToolParameter<List<String>>(
+            name = name,
             description = description,
             required = true,
         )
 
     class RequiredString(
+        name: String,
         description: String,
     ) : McpToolParameter<String>(
+            name = name,
             description = description,
             required = true,
         )
 
     class OptionalString(
+        name: String,
         description: String,
         val default: String?,
     ) : McpToolParameter<String?>(
+            name = name,
             description = description,
             required = false,
         )
 
     class OptionalBoolean(
+        name: String,
         description: String,
         val default: Boolean?,
     ) : McpToolParameter<Boolean?>(
+            name = name,
             description = description,
             required = false,
         )
 
     class RequiredInt(
+        name: String,
         description: String,
         val minimum: Int?,
         val maximum: Int?,
     ) : McpToolParameter<Int>(
+            name = name,
             description = description,
             required = true,
         )
 
     class OptionalInt(
+        name: String,
         description: String,
         val minimum: Int?,
         val maximum: Int?,
         val default: Int?,
     ) : McpToolParameter<Int?>(
+            name = name,
             description = description,
             required = false,
         )
 
     class RequiredStringEnum(
+        name: String,
         description: String,
         val values: List<String>,
     ) : McpToolParameter<String>(
+            name = name,
             description = description,
             required = true,
         )
 
     class OptionalStringEnum(
+        name: String,
         description: String,
         val values: List<String>,
         val default: String?,
     ) : McpToolParameter<String?>(
+            name = name,
             description = description,
             required = false,
         )

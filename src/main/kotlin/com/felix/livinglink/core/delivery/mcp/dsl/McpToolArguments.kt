@@ -9,6 +9,9 @@ import kotlinx.serialization.json.jsonPrimitive
 class McpToolArguments(
     private val values: Map<String, JsonElement>?,
 ) {
+    operator fun <T> McpToolParameter<T>.invoke(): T =
+        get(this)
+
     @Suppress("UNCHECKED_CAST")
     operator fun <T> get(parameter: McpToolParameter<T>): T =
         when (parameter) {
