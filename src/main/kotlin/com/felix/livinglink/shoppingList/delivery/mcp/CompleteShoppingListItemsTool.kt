@@ -29,13 +29,11 @@ class CompleteShoppingListItemsTool(
             handle {
                 val result =
                     completeShoppingListItemsUseCase(
+                        byUserId = user.id,
                         ids = ids(),
                     )
 
                 success {
-                    line("userId=${user.id}")
-                    line("username=${user.username}")
-
                     result.completedItems.forEach { item ->
                         line("- Completed '${item.name}'.")
                     }

@@ -41,6 +41,15 @@ class McpApiKeySettings {
             }
     }
 
+    private val usersById: Map<String, McpRequestUser> by lazy {
+        usersByApiKey.values.associateBy { user ->
+            user.id
+        }
+    }
+
     fun userForApiKey(apiKey: String): McpRequestUser? =
         usersByApiKey[apiKey]
+
+    fun userById(id: String): McpRequestUser? =
+        usersById[id]
 }

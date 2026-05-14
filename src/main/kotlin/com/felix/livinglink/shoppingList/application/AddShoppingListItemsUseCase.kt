@@ -12,23 +12,19 @@ class AddShoppingListItemsUseCase(
     private val uuidGenerator: UuidGenerator,
     private val timeProvider: TimeProvider,
 ) {
-    suspend operator fun invoke(names: List<String>): List<ShoppingListItem> {
-        val cleanedNames =
-            names
-                .map { name ->
-                    name.trim()
-                }.filter { name ->
-                    name.isNotBlank()
-                }.distinct()
-
+    suspend operator fun invoke(
+        byUserId: String,
+        names: List<String>,
+    ): List<ShoppingListItem> {
         val now = timeProvider()
 
-        return cleanedNames.map { name ->
+        return names.map { name ->
             shoppingListItemRepository.create(
                 ShoppingListItem(
                     id = uuidGenerator(),
                     name = name,
-                    completed = false,
+                    createdByUserId = byUserId,
+                    completionEvents = emptyList(),
                     createdAt = now,
                     updatedAt = now,
                 ),

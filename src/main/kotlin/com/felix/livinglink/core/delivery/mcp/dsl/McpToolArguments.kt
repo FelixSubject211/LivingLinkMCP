@@ -48,7 +48,7 @@ class McpToolArguments(
                     item.trim()
                 }.filter { item ->
                     item.isNotBlank()
-                }.distinct()
+                }
 
         require(cleanedValues.isNotEmpty()) {
             "'${parameter.name}' must contain at least one value."

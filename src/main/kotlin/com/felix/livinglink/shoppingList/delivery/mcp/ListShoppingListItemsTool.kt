@@ -4,6 +4,7 @@ import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.core.domain.UserLookup
 import com.felix.livinglink.shoppingList.application.ListShoppingListItemsUseCase
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemSort
@@ -13,6 +14,7 @@ import org.koin.core.annotation.Single
 @Single(binds = [McpToolRegistrar::class])
 class ListShoppingListItemsTool(
     private val listShoppingListItemsUseCase: ListShoppingListItemsUseCase,
+    private val userLookup: UserLookup,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -68,16 +70,26 @@ class ListShoppingListItemsTool(
                     )
 
                 success {
-                    line("userId=${user.id}")
-                    line("username=${user.username}")
-
                     ifEmpty(items, "No shopping list items found.") {
                         items.forEach { item ->
-                            val status = if (item.completed) "done" else "open"
+                            val createdByName =
+                                userLookup.findById(item.createdByUserId)?.username
+                                    ?: item.createdByUserId
+
+                            val lastEvent = item.completionEvents.lastOrNull()
+                            val status =
+                                if (item.isCompleted && lastEvent != null) {
+                                    val completedByName =
+                                        userLookup.findById(lastEvent.byUserId)?.username
+                                            ?: lastEvent.byUserId
+                                    "done by $completedByName at ${lastEvent.at}"
+                                } else {
+                                    "open"
+                                }
 
                             line(
                                 "- [$status] ${item.name} " +
-                                    "(id: ${item.id}, createdAt: ${item.createdAt}, updatedAt: ${item.updatedAt})",
+                                    "(id: ${item.id}, createdBy: $createdByName, createdAt: ${item.createdAt})",
                             )
                         }
                     }

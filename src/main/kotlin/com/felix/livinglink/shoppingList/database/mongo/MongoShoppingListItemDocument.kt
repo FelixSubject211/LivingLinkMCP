@@ -10,7 +10,9 @@ data class MongoShoppingListItemDocument(
     @param:BsonId
     override val id: String,
     val name: String,
+    val createdByUserId: String,
     val completed: Boolean,
+    val completionEvents: List<MongoCompletionEventDocument>,
     val createdAt: Instant,
     val updatedAt: Instant,
     @param:BsonProperty("version")
@@ -23,7 +25,11 @@ data class MongoShoppingListItemDocument(
         ShoppingListItem(
             id = id,
             name = name,
-            completed = completed,
+            createdByUserId = createdByUserId,
+            completionEvents =
+                completionEvents.map { event ->
+                    event.toDomain()
+                },
             createdAt = createdAt,
             updatedAt = updatedAt,
             version = version,
@@ -34,10 +40,37 @@ data class MongoShoppingListItemDocument(
             MongoShoppingListItemDocument(
                 id = item.id,
                 name = item.name,
-                completed = item.completed,
+                createdByUserId = item.createdByUserId,
+                completed = item.isCompleted,
+                completionEvents =
+                    item.completionEvents.map { event ->
+                        MongoCompletionEventDocument.fromDomain(event)
+                    },
                 createdAt = item.createdAt,
                 updatedAt = item.updatedAt,
                 version = item.version,
+            )
+    }
+}
+
+data class MongoCompletionEventDocument(
+    val byUserId: String,
+    val completed: Boolean,
+    val at: Instant,
+) {
+    fun toDomain(): ShoppingListItem.CompletionEvent =
+        ShoppingListItem.CompletionEvent(
+            byUserId = byUserId,
+            completed = completed,
+            at = at,
+        )
+
+    companion object {
+        fun fromDomain(event: ShoppingListItem.CompletionEvent): MongoCompletionEventDocument =
+            MongoCompletionEventDocument(
+                byUserId = event.byUserId,
+                completed = event.completed,
+                at = event.at,
             )
     }
 }

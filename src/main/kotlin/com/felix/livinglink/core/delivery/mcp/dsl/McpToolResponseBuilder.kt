@@ -10,10 +10,10 @@ class McpToolResponseBuilder {
         lines += value
     }
 
-    fun <T> ifEmpty(
+    suspend fun <T> ifEmpty(
         values: List<T>,
         emptyMessage: String,
-        block: McpToolResponseBuilder.() -> Unit,
+        block: suspend McpToolResponseBuilder.() -> Unit,
     ) {
         if (values.isEmpty()) {
             line(emptyMessage)
@@ -28,11 +28,11 @@ class McpToolResponseBuilder {
         )
 }
 
-fun success(
-    block: McpToolResponseBuilder.() -> Unit,
+suspend fun success(
+    block: suspend McpToolResponseBuilder.() -> Unit,
 ): CallToolResult =
     McpToolResponseBuilder()
-        .apply(block)
+        .apply { block() }
         .build()
 
 fun success(message: String): CallToolResult =

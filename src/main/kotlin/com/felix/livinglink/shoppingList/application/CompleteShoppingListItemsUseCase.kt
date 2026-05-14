@@ -10,25 +10,28 @@ class CompleteShoppingListItemsUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
     private val timeProvider: TimeProvider,
 ) {
-    suspend operator fun invoke(ids: List<String>): Result {
-        val cleanedIds =
-            ids
-                .map { id ->
-                    id.trim()
-                }.filter { id ->
-                    id.isNotBlank()
-                }.distinct()
+    suspend operator fun invoke(
+        byUserId: String,
+        ids: List<String>,
+    ): Result {
+        val cleanedIds = ids.distinct()
 
         val now = timeProvider()
 
         return cleanedIds.fold(Result()) { result, id ->
             val item = shoppingListItemRepository.findById(id) ?: return@fold result.withMissingId(id)
 
-            if (item.completed) {
+            if (item.isCompleted) {
                 return@fold result.withAlreadyCompletedItem(item)
             }
 
-            val completedItem = shoppingListItemRepository.update(item.complete(now))
+            val completedItem =
+                shoppingListItemRepository.update(
+                    item.complete(
+                        byUserId = byUserId,
+                        at = now,
+                    ),
+                )
 
             if (completedItem == null) {
                 result.withMissingId(id)

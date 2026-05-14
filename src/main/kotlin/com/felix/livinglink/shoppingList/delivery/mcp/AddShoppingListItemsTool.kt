@@ -29,13 +29,11 @@ class AddShoppingListItemsTool(
             handle {
                 val items =
                     addShoppingListItemsUseCase(
+                        byUserId = user.id,
                         names = names(),
                     )
 
                 success {
-                    line("userId=${user.id}")
-                    line("username=${user.username}")
-
                     items.forEach { item ->
                         line("- Added '${item.name}' with id '${item.id}'.")
                     }
