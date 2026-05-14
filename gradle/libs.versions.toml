@@ -6,6 +6,7 @@ ktlintGradle = "14.2.0"
 koin = "4.2.1"
 koinCompiler = "0.3.0"
 mongodb = "5.7.0"
+ktor = "3.3.3"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -14,6 +15,7 @@ mcp-kotlin-sdk-server = { module = "io.modelcontextprotocol:kotlin-sdk-server", 
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
 mongodb-driver-kotlin-coroutine = { module = "org.mongodb:mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

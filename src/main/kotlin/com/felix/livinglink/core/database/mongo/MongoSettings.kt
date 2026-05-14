@@ -1,12 +1,13 @@
 package com.felix.livinglink.core.database.mongo
 
+import com.felix.livinglink.core.system.Env
 import org.koin.core.annotation.Single
 
 @Single
 class MongoSettings {
     val connectionString: String =
-        System.getenv("LIVINGLINK_MONGO_CONNECTION_STRING") ?: "mongodb://localhost:27017"
+        Env.required("LIVINGLINK_MONGO_CONNECTION_STRING")
 
     val databaseName: String =
-        System.getenv("LIVINGLINK_MONGO_DATABASE") ?: "livinglink"
+        Env.required("LIVINGLINK_MONGO_DATABASE")
 }

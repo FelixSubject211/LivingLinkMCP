@@ -2,15 +2,20 @@ package com.felix.livinglink.shoppingList.delivery.mcp
 
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
+import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.shoppingList.application.CompleteShoppingListItemsUseCase
+import io.modelcontextprotocol.kotlin.sdk.server.Server
 import org.koin.core.annotation.Single
 
 @Single(binds = [McpToolRegistrar::class])
-fun completeShoppingListItemsTool(
-    completeShoppingListItemsUseCase: CompleteShoppingListItemsUseCase,
-): McpToolRegistrar =
-    McpToolRegistrar { server ->
+class CompleteShoppingListItemsTool(
+    private val completeShoppingListItemsUseCase: CompleteShoppingListItemsUseCase,
+) : McpToolRegistrar {
+    override fun register(
+        server: Server,
+        user: McpRequestUser,
+    ) {
         server.tool(
             name = "complete_shopping_list_items",
             description = "Marks one or more shopping list items as completed.",
@@ -28,6 +33,9 @@ fun completeShoppingListItemsTool(
                     )
 
                 success {
+                    line("userId=${user.id}")
+                    line("username=${user.username}")
+
                     result.completedItems.forEach { item ->
                         line("- Completed '${item.name}'.")
                     }
@@ -43,3 +51,4 @@ fun completeShoppingListItemsTool(
             }
         }
     }
+}

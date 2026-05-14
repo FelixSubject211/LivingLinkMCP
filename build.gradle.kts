@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.annotations)
     implementation(libs.mongodb.driver.kotlin.coroutine)
+    implementation(libs.ktor.server.cio)
 
     testImplementation(libs.kotlin.test)
 }

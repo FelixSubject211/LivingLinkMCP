@@ -10,7 +10,7 @@ import org.koin.core.annotation.Single
 class LivingLinkMcpServerFactory(
     private val toolRegistrars: List<McpToolRegistrar>,
 ) : McpServerFactory {
-    override fun create(): Server =
+    override fun create(user: McpRequestUser): Server =
         Server(
             serverInfo =
                 Implementation(
@@ -26,7 +26,10 @@ class LivingLinkMcpServerFactory(
                 ),
         ).also { server ->
             toolRegistrars.forEach { toolRegistrar ->
-                toolRegistrar.register(server)
+                toolRegistrar.register(
+                    server = server,
+                    user = user,
+                )
             }
         }
 }

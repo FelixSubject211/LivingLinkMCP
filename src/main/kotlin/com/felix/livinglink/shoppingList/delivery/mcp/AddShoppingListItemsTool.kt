@@ -2,15 +2,20 @@ package com.felix.livinglink.shoppingList.delivery.mcp
 
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
+import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.shoppingList.application.AddShoppingListItemsUseCase
+import io.modelcontextprotocol.kotlin.sdk.server.Server
 import org.koin.core.annotation.Single
 
 @Single(binds = [McpToolRegistrar::class])
-fun addShoppingListItemsTool(
-    addShoppingListItemsUseCase: AddShoppingListItemsUseCase,
-): McpToolRegistrar =
-    McpToolRegistrar { server ->
+class AddShoppingListItemsTool(
+    private val addShoppingListItemsUseCase: AddShoppingListItemsUseCase,
+) : McpToolRegistrar {
+    override fun register(
+        server: Server,
+        user: McpRequestUser,
+    ) {
         server.tool(
             name = "add_shopping_list_items",
             description = "Adds one or more items to the shopping list.",
@@ -28,6 +33,9 @@ fun addShoppingListItemsTool(
                     )
 
                 success {
+                    line("userId=${user.id}")
+                    line("username=${user.username}")
+
                     items.forEach { item ->
                         line("- Added '${item.name}' with id '${item.id}'.")
                     }
@@ -35,3 +43,4 @@ fun addShoppingListItemsTool(
             }
         }
     }
+}

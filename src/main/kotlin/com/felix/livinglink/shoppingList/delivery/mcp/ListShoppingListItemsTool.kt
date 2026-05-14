@@ -2,17 +2,22 @@ package com.felix.livinglink.shoppingList.delivery.mcp
 
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
+import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.shoppingList.application.ListShoppingListItemsUseCase
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemSort
+import io.modelcontextprotocol.kotlin.sdk.server.Server
 import org.koin.core.annotation.Single
 
 @Single(binds = [McpToolRegistrar::class])
-fun listShoppingListItemsTool(
-    listShoppingListItemsUseCase: ListShoppingListItemsUseCase,
-): McpToolRegistrar =
-    McpToolRegistrar { server ->
+class ListShoppingListItemsTool(
+    private val listShoppingListItemsUseCase: ListShoppingListItemsUseCase,
+) : McpToolRegistrar {
+    override fun register(
+        server: Server,
+        user: McpRequestUser,
+    ) {
         server.tool(
             name = "list_shopping_list_items",
             description = "Lists shopping list items with optional filtering, sorting and limit.",
@@ -63,6 +68,9 @@ fun listShoppingListItemsTool(
                     )
 
                 success {
+                    line("userId=${user.id}")
+                    line("username=${user.username}")
+
                     ifEmpty(items, "No shopping list items found.") {
                         items.forEach { item ->
                             val status = if (item.completed) "done" else "open"
@@ -77,6 +85,7 @@ fun listShoppingListItemsTool(
             }
         }
     }
+}
 
 private fun shoppingListItemSort(
     sortBy: String?,

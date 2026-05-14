@@ -4,19 +4,81 @@ Kotlin MCP server.
 
 ## Requirements
 
-- JDK
+- JDK 21
 - Docker
 - Docker Compose
 
-## MongoDB
+## Modes
 
-Start MongoDB and Mongo Express:
+livinglink can run in two modes:
+
+- `http`: Docker + Cloudflare Tunnel
+- `stdio`: local Claude Desktop
+
+Create a `.env` file in the project root for the mode you want to use.
+
+## Mode 1: HTTP with Cloudflare Tunnel
+
+Use this mode for the public Cloudflare URL.
+
+### `.env`
+
+```env
+LIVINGLINK_MCP_TRANSPORT=http
+
+LIVINGLINK_MCP_HTTP_HOST=0.0.0.0
+LIVINGLINK_MCP_HTTP_PORT=3000
+LIVINGLINK_MCP_HTTP_PATH=/mcp
+LIVINGLINK_MCP_API_KEYS=max:MaxMusterfrau:CHANGE_ME_MAX,anna:AnnaMusterfrau:CHANGE_ME_ANNA
+
+LIVINGLINK_MONGO_CONNECTION_STRING=mongodb://mongo:27017
+LIVINGLINK_MONGO_DATABASE=livinglink
+
+CLOUDFLARE_TUNNEL_TOKEN=CHANGE_ME_CLOUDFLARE_TUNNEL_TOKEN
+```
+
+### Start
+
+```bash
+docker compose \
+  --env-file .env \
+  -f docker-compose.yml \
+  -f docker-compose.app.yml \
+  -f docker-compose.cloudflare.yml \
+  up --build
+```
+
+### MCP URL
+
+Use your Cloudflare domain, `/mcp`, and the API key as `key`.
+
+```text
+https://your-cloudflare-domain.example/mcp?key=CHANGE_ME_MAX
+```
+
+## Mode 2: Stdio for Claude Desktop
+
+Use this mode when Claude Desktop starts livinglink locally through `run-claude-mcp.sh`.
+
+### `.env`
+
+```env
+LIVINGLINK_MCP_TRANSPORT=stdio
+
+LIVINGLINK_STDIO_USER_ID=max
+LIVINGLINK_STDIO_USERNAME=MaxMusterfrau
+
+LIVINGLINK_MONGO_CONNECTION_STRING=mongodb://localhost:27017
+LIVINGLINK_MONGO_DATABASE=livinglink
+```
+
+### Start MongoDB
 
 ```bash
 docker compose up -d
 ```
 
-## Build
+### Build
 
 ```bash
 ./gradlew installDist
@@ -24,7 +86,7 @@ docker compose up -d
 
 ## local.properties
 
-Add your local project path:
+Create `local.properties` in the project root:
 
 ```properties
 projectDir=/absolute/path/to/livinglink
@@ -34,7 +96,7 @@ projectDir=/absolute/path/to/livinglink
 
 ### macOS
 
-Edit:
+Edit this file:
 
 ```text
 ~/Library/Application Support/Claude/claude_desktop_config.json
@@ -52,12 +114,18 @@ Example:
 }
 ```
 
-## After changes
-
-Rebuild the distribution:
+After changing Kotlin code, rebuild:
 
 ```bash
 ./gradlew installDist
+```
+
+## Mongo Express
+
+When MongoDB is running, Mongo Express is available at:
+
+```text
+http://localhost:8081
 ```
 
 ## Lint

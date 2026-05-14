@@ -4,3 +4,4 @@
 /build/classes/
 /build/classes/kotlin/main/local.properties
 /local.properties
+.env
