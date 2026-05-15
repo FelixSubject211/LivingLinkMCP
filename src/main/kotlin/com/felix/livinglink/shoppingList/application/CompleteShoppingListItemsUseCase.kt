@@ -49,9 +49,9 @@ class CompleteShoppingListItemsUseCase(
         }
 
         return Result(
-            completedItems = completedItems,
-            alreadyCompletedItems = alreadyCompletedItems,
-            missingIds = missingIds,
+            completedItems = completedItems.toList(),
+            alreadyCompletedItems = alreadyCompletedItems.toList(),
+            missingIds = missingIds.toList(),
         )
     }
 
