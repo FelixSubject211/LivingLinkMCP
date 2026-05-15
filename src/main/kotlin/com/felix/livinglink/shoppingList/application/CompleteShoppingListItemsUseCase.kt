@@ -1,6 +1,7 @@
 package com.felix.livinglink.shoppingList.application
 
 import com.felix.livinglink.core.domain.TimeProvider
+import com.felix.livinglink.core.domain.retryOptimisticLock
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
 import org.koin.core.annotation.Single
@@ -14,51 +15,49 @@ class CompleteShoppingListItemsUseCase(
         byUserId: String,
         ids: List<String>,
     ): Result {
-        val cleanedIds = ids.distinct()
+        val completedItems = mutableListOf<ShoppingListItem>()
+        val alreadyCompletedItems = mutableListOf<ShoppingListItem>()
+        val missingIds = mutableListOf<String>()
 
-        val now = timeProvider()
+        ids.distinct().forEach { id ->
+            retryOptimisticLock {
+                val item =
+                    shoppingListItemRepository.findById(id)
+                        ?: run {
+                            missingIds += id
+                            return@retryOptimisticLock
+                        }
 
-        return cleanedIds.fold(Result()) { result, id ->
-            val item = shoppingListItemRepository.findById(id) ?: return@fold result.withMissingId(id)
+                if (item.isCompleted) {
+                    alreadyCompletedItems += item
+                    return@retryOptimisticLock
+                }
 
-            if (item.isCompleted) {
-                return@fold result.withAlreadyCompletedItem(item)
-            }
+                val completedItem =
+                    shoppingListItemRepository.update(
+                        item.complete(
+                            byUserId = byUserId,
+                            at = timeProvider(),
+                        ),
+                    ) ?: run {
+                        missingIds += id
+                        return@retryOptimisticLock
+                    }
 
-            val completedItem =
-                shoppingListItemRepository.update(
-                    item.complete(
-                        byUserId = byUserId,
-                        at = now,
-                    ),
-                )
-
-            if (completedItem == null) {
-                result.withMissingId(id)
-            } else {
-                result.withCompletedItem(completedItem)
+                completedItems += completedItem
             }
         }
+
+        return Result(
+            completedItems = completedItems,
+            alreadyCompletedItems = alreadyCompletedItems,
+            missingIds = missingIds,
+        )
     }
 
     data class Result(
-        val completedItems: List<ShoppingListItem> = emptyList(),
-        val alreadyCompletedItems: List<ShoppingListItem> = emptyList(),
-        val missingIds: List<String> = emptyList(),
-    ) {
-        fun withCompletedItem(item: ShoppingListItem): Result =
-            copy(
-                completedItems = completedItems + item,
-            )
-
-        fun withAlreadyCompletedItem(item: ShoppingListItem): Result =
-            copy(
-                alreadyCompletedItems = alreadyCompletedItems + item,
-            )
-
-        fun withMissingId(id: String): Result =
-            copy(
-                missingIds = missingIds + id,
-            )
-    }
+        val completedItems: List<ShoppingListItem>,
+        val alreadyCompletedItems: List<ShoppingListItem>,
+        val missingIds: List<String>,
+    )
 }
