@@ -15,10 +15,10 @@ class AddShoppingListItemsUseCase(
     suspend operator fun invoke(
         byUserId: String,
         names: List<String>,
-    ): List<ShoppingListItem> {
-        val now = timeProvider()
+    ): List<ShoppingListItem> =
+        names.map { name ->
+            val now = timeProvider()
 
-        return names.map { name ->
             shoppingListItemRepository.create(
                 ShoppingListItem(
                     id = uuidGenerator(),
@@ -30,5 +30,4 @@ class AddShoppingListItemsUseCase(
                 ),
             )
         }
-    }
 }
