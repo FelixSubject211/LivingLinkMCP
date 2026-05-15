@@ -1,7 +1,9 @@
 package com.felix.livinglink.shoppingList.domain
 
+import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
+@Serializable
 data class ShoppingListItem(
     val id: String,
     val name: String,
@@ -26,6 +28,7 @@ data class ShoppingListItem(
                     ),
         )
 
+    @Serializable
     data class CompletionEvent(
         val byUserId: String,
         val completed: Boolean,

@@ -1,21 +1,32 @@
 package com.felix.livinglink.shoppingList.domain
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ShoppingListItemQuery(
     val completed: Boolean? = null,
     val limit: Int,
     val sort: ShoppingListItemSort = ShoppingListItemSort.CreatedAtDescending,
 )
 
-sealed interface ShoppingListItemSort {
-    data object CreatedAtAscending : ShoppingListItemSort
+@Serializable
+enum class ShoppingListItemSort {
+    @SerialName("createdAtAsc")
+    CreatedAtAscending,
 
-    data object CreatedAtDescending : ShoppingListItemSort
+    @SerialName("createdAtDesc")
+    CreatedAtDescending,
 
-    data object UpdatedAtAscending : ShoppingListItemSort
+    @SerialName("updatedAtAsc")
+    UpdatedAtAscending,
 
-    data object UpdatedAtDescending : ShoppingListItemSort
+    @SerialName("updatedAtDesc")
+    UpdatedAtDescending,
 
-    data object NameAscending : ShoppingListItemSort
+    @SerialName("nameAsc")
+    NameAscending,
 
-    data object NameDescending : ShoppingListItemSort
+    @SerialName("nameDesc")
+    NameDescending,
 }

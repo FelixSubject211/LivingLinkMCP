@@ -1,6 +1,7 @@
 package com.felix.livinglink.core.delivery.mcp.dsl
 
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import kotlinx.serialization.serializer
 
 class McpToolBuilder {
     private val mutableParameters: MutableList<McpToolParameter<*>> = mutableListOf()
@@ -16,50 +17,44 @@ class McpToolBuilder {
                 "MCP tool handler is required. Use handle { ... } inside the tool block."
             }
 
-    fun requiredStringList(
+    inline fun <reified T : Any> required(
         name: String,
         description: String,
-    ): McpToolParameter<List<String>> =
+    ): McpToolParameter<T> =
         parameter(
-            McpToolParameter.RequiredStringList(
+            McpToolParameter.Required(
                 name = name,
                 description = description,
+                serializer = serializer<T>(),
+                schema = McpToolSchemaBuilder.schemaFor<T>(),
             ),
         )
 
-    fun optionalString(
+    inline fun <reified T : Any> optional(
         name: String,
         description: String,
-        default: String? = null,
-    ): McpToolParameter<String?> =
+    ): McpToolParameter<T?> =
         parameter(
-            McpToolParameter.OptionalString(
+            McpToolParameter.Optional(
                 name = name,
                 description = description,
-                default = default,
+                serializer = serializer<T>(),
+                schema = McpToolSchemaBuilder.schemaFor<T>(),
+                default = null,
             ),
         )
 
-    fun requiredString(
+    inline fun <reified T : Any> optional(
         name: String,
         description: String,
-    ): McpToolParameter<String> =
+        default: T,
+    ): McpToolParameter<T> =
         parameter(
-            McpToolParameter.RequiredString(
+            McpToolParameter.OptionalWithDefault(
                 name = name,
                 description = description,
-            ),
-        )
-
-    fun optionalBoolean(
-        name: String,
-        description: String,
-        default: Boolean? = null,
-    ): McpToolParameter<Boolean?> =
-        parameter(
-            McpToolParameter.OptionalBoolean(
-                name = name,
-                description = description,
+                serializer = serializer<T>(),
+                schema = McpToolSchemaBuilder.schemaFor<T>(),
                 default = default,
             ),
         )
@@ -71,11 +66,21 @@ class McpToolBuilder {
         maximum: Int? = null,
     ): McpToolParameter<Int> =
         parameter(
-            McpToolParameter.RequiredInt(
+            McpToolParameter.Required(
                 name = name,
                 description = description,
-                minimum = minimum,
-                maximum = maximum,
+                serializer = serializer<Int>(),
+                schema =
+                    McpToolSchemaBuilder.intSchema(
+                        minimum = minimum,
+                        maximum = maximum,
+                    ),
+                validator =
+                    intRangeValidator(
+                        name = name,
+                        minimum = minimum,
+                        maximum = maximum,
+                    ),
             ),
         )
 
@@ -84,43 +89,138 @@ class McpToolBuilder {
         description: String,
         minimum: Int? = null,
         maximum: Int? = null,
-        default: Int? = null,
     ): McpToolParameter<Int?> =
         parameter(
-            McpToolParameter.OptionalInt(
+            McpToolParameter.Optional(
                 name = name,
                 description = description,
-                minimum = minimum,
-                maximum = maximum,
-                default = default,
+                serializer = serializer<Int>(),
+                schema =
+                    McpToolSchemaBuilder.intSchema(
+                        minimum = minimum,
+                        maximum = maximum,
+                    ),
+                default = null,
+                validator =
+                    intRangeValidator(
+                        name = name,
+                        minimum = minimum,
+                        maximum = maximum,
+                    ),
             ),
         )
 
-    fun optionalStringEnum(
+    fun optionalInt(
         name: String,
         description: String,
-        values: List<String>,
-        default: String? = null,
-    ): McpToolParameter<String?> =
+        minimum: Int? = null,
+        maximum: Int? = null,
+        default: Int,
+    ): McpToolParameter<Int> =
         parameter(
-            McpToolParameter.OptionalStringEnum(
+            McpToolParameter.OptionalWithDefault(
                 name = name,
                 description = description,
-                values = values,
+                serializer = serializer<Int>(),
+                schema =
+                    McpToolSchemaBuilder.intSchema(
+                        minimum = minimum,
+                        maximum = maximum,
+                    ),
                 default = default,
+                validator =
+                    intRangeValidator(
+                        name = name,
+                        minimum = minimum,
+                        maximum = maximum,
+                    ),
             ),
         )
 
-    fun requiredStringEnum(
+    fun requiredDouble(
         name: String,
         description: String,
-        values: List<String>,
-    ): McpToolParameter<String> =
+        minimum: Double? = null,
+        maximum: Double? = null,
+        roundedToDecimalPlaces: Int? = null,
+    ): McpToolParameter<Double> =
         parameter(
-            McpToolParameter.RequiredStringEnum(
+            McpToolParameter.Required(
                 name = name,
                 description = description,
-                values = values,
+                serializer = serializer<Double>(),
+                schema =
+                    McpToolSchemaBuilder.doubleSchema(
+                        minimum = minimum,
+                        maximum = maximum,
+                        roundedToDecimalPlaces = roundedToDecimalPlaces,
+                    ),
+                validator =
+                    doubleRangeValidator(
+                        name = name,
+                        minimum = minimum,
+                        maximum = maximum,
+                        roundedToDecimalPlaces = roundedToDecimalPlaces,
+                    ),
+            ),
+        )
+
+    fun optionalDouble(
+        name: String,
+        description: String,
+        minimum: Double? = null,
+        maximum: Double? = null,
+        roundedToDecimalPlaces: Int? = null,
+    ): McpToolParameter<Double?> =
+        parameter(
+            McpToolParameter.Optional(
+                name = name,
+                description = description,
+                serializer = serializer<Double>(),
+                schema =
+                    McpToolSchemaBuilder.doubleSchema(
+                        minimum = minimum,
+                        maximum = maximum,
+                        roundedToDecimalPlaces = roundedToDecimalPlaces,
+                    ),
+                default = null,
+                validator =
+                    doubleRangeValidator(
+                        name = name,
+                        minimum = minimum,
+                        maximum = maximum,
+                        roundedToDecimalPlaces = roundedToDecimalPlaces,
+                    ),
+            ),
+        )
+
+    fun optionalDouble(
+        name: String,
+        description: String,
+        minimum: Double? = null,
+        maximum: Double? = null,
+        roundedToDecimalPlaces: Int? = null,
+        default: Double,
+    ): McpToolParameter<Double> =
+        parameter(
+            McpToolParameter.OptionalWithDefault(
+                name = name,
+                description = description,
+                serializer = serializer<Double>(),
+                schema =
+                    McpToolSchemaBuilder.doubleSchema(
+                        minimum = minimum,
+                        maximum = maximum,
+                        roundedToDecimalPlaces = roundedToDecimalPlaces,
+                    ),
+                default = default,
+                validator =
+                    doubleRangeValidator(
+                        name = name,
+                        minimum = minimum,
+                        maximum = maximum,
+                        roundedToDecimalPlaces = roundedToDecimalPlaces,
+                    ),
             ),
         )
 
@@ -128,7 +228,7 @@ class McpToolBuilder {
         mutableHandler = handler
     }
 
-    private fun <T> parameter(parameter: McpToolParameter<T>): McpToolParameter<T> {
+    fun <T> parameter(parameter: McpToolParameter<T>): McpToolParameter<T> {
         mutableParameters += parameter
 
         return parameter

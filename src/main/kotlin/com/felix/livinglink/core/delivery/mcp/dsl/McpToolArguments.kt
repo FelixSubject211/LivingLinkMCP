@@ -1,195 +1,78 @@
 package com.felix.livinglink.core.delivery.mcp.dsl
 
-import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonPrimitive
 
 class McpToolArguments(
     private val values: Map<String, JsonElement>?,
+    private val json: Json =
+        Json {
+            ignoreUnknownKeys = true
+        },
 ) {
     operator fun <T> McpToolParameter<T>.invoke(): T =
         get(this)
 
-    @Suppress("UNCHECKED_CAST")
     operator fun <T> get(parameter: McpToolParameter<T>): T =
         when (parameter) {
-            is McpToolParameter.RequiredStringList -> requiredStringList(parameter)
-            is McpToolParameter.RequiredString -> requiredString(parameter)
-            is McpToolParameter.OptionalString -> optionalString(parameter)
-            is McpToolParameter.OptionalBoolean -> optionalBoolean(parameter)
-            is McpToolParameter.RequiredInt -> requiredInt(parameter)
-            is McpToolParameter.OptionalInt -> optionalInt(parameter)
-            is McpToolParameter.RequiredStringEnum -> requiredStringEnum(parameter)
-            is McpToolParameter.OptionalStringEnum -> optionalStringEnum(parameter)
-        } as T
+            is McpToolParameter.Required<*> -> required(parameter)
+            is McpToolParameter.Optional<*> -> optional(parameter)
+            is McpToolParameter.OptionalWithDefault<*> -> optionalWithDefault(parameter)
+        }
 
-    private fun requiredStringList(
-        parameter: McpToolParameter.RequiredStringList,
-    ): List<String> {
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> required(parameter: McpToolParameter.Required<*>): T {
         val value =
             requireNotNull(values?.get(parameter.name)) {
                 "'${parameter.name}' is required."
             }
 
-        val rawValues =
-            if (value is JsonArray) {
-                value.map { element ->
-                    element.jsonPrimitive.content
-                }
+        val decoded =
+            json.decodeFromJsonElement(
+                deserializer = parameter.serializer,
+                element = value,
+            )
+
+        parameter.validate(decoded)
+
+        return decoded as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> optional(parameter: McpToolParameter.Optional<*>): T {
+        val value = values?.get(parameter.name)
+
+        val decoded =
+            if (value == null) {
+                parameter.default
             } else {
-                listOf(value.jsonPrimitive.content)
+                json.decodeFromJsonElement(
+                    deserializer = parameter.serializer,
+                    element = value,
+                )
             }
 
-        val cleanedValues =
-            rawValues
-                .map { item ->
-                    item.trim()
-                }.filter { item ->
-                    item.isNotBlank()
-                }
+        parameter.validate(decoded)
 
-        require(cleanedValues.isNotEmpty()) {
-            "'${parameter.name}' must contain at least one value."
-        }
-
-        return cleanedValues
+        return decoded as T
     }
 
-    private fun requiredString(
-        parameter: McpToolParameter.RequiredString,
-    ): String =
-        requireNotNull(optionalStringValue(parameter.name)) {
-            "'${parameter.name}' is required."
-        }
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> optionalWithDefault(parameter: McpToolParameter.OptionalWithDefault<*>): T {
+        val value = values?.get(parameter.name)
 
-    private fun optionalString(
-        parameter: McpToolParameter.OptionalString,
-    ): String? =
-        optionalStringValue(parameter.name) ?: parameter.default
-
-    private fun optionalBoolean(
-        parameter: McpToolParameter.OptionalBoolean,
-    ): Boolean? =
-        values
-            ?.get(parameter.name)
-            ?.jsonPrimitive
-            ?.booleanOrNull
-            ?: parameter.default
-
-    private fun requiredInt(
-        parameter: McpToolParameter.RequiredInt,
-    ): Int {
-        val value =
-            requireNotNull(
-                values
-                    ?.get(parameter.name)
-                    ?.jsonPrimitive
-                    ?.intOrNull,
-            ) {
-                "'${parameter.name}' is required."
+        val decoded =
+            if (value == null) {
+                parameter.default
+            } else {
+                json.decodeFromJsonElement(
+                    deserializer = parameter.serializer,
+                    element = value,
+                )
             }
 
-        validateRange(
-            name = parameter.name,
-            value = value,
-            minimum = parameter.minimum,
-            maximum = parameter.maximum,
-        )
+        parameter.validate(decoded)
 
-        return value
-    }
-
-    private fun optionalInt(
-        parameter: McpToolParameter.OptionalInt,
-    ): Int? {
-        val value =
-            values
-                ?.get(parameter.name)
-                ?.jsonPrimitive
-                ?.intOrNull
-                ?: parameter.default
-                ?: return null
-
-        validateRange(
-            name = parameter.name,
-            value = value,
-            minimum = parameter.minimum,
-            maximum = parameter.maximum,
-        )
-
-        return value
-    }
-
-    private fun requiredStringEnum(
-        parameter: McpToolParameter.RequiredStringEnum,
-    ): String {
-        val value =
-            requireNotNull(optionalStringValue(parameter.name)) {
-                "'${parameter.name}' is required."
-            }
-
-        validateEnum(
-            name = parameter.name,
-            value = value,
-            values = parameter.values,
-        )
-
-        return value
-    }
-
-    private fun optionalStringEnum(
-        parameter: McpToolParameter.OptionalStringEnum,
-    ): String? {
-        val value =
-            optionalStringValue(parameter.name) ?: parameter.default ?: return null
-
-        validateEnum(
-            name = parameter.name,
-            value = value,
-            values = parameter.values,
-        )
-
-        return value
-    }
-
-    private fun optionalStringValue(name: String): String? =
-        values
-            ?.get(name)
-            ?.jsonPrimitive
-            ?.content
-            ?.trim()
-            ?.takeIf { value ->
-                value.isNotBlank()
-            }
-
-    private fun validateRange(
-        name: String,
-        value: Int,
-        minimum: Int?,
-        maximum: Int?,
-    ) {
-        if (minimum != null) {
-            require(value >= minimum) {
-                "'$name' must be greater than or equal to $minimum."
-            }
-        }
-
-        if (maximum != null) {
-            require(value <= maximum) {
-                "'$name' must be less than or equal to $maximum."
-            }
-        }
-    }
-
-    private fun validateEnum(
-        name: String,
-        value: String,
-        values: List<String>,
-    ) {
-        require(value in values) {
-            "'$name' must be one of: ${values.joinToString()}."
-        }
+        return decoded as T
     }
 }

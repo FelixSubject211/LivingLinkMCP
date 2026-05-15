@@ -1,89 +1,76 @@
 package com.felix.livinglink.core.delivery.mcp.dsl
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.json.JsonElement
+
 sealed class McpToolParameter<T>(
     val name: String,
     val description: String,
     val required: Boolean,
+    val serializer: KSerializer<T>,
+    val schema: JsonElement,
 ) {
-    class RequiredStringList(
+    abstract fun validate(value: Any?)
+
+    class Required<T : Any>(
         name: String,
         description: String,
-    ) : McpToolParameter<List<String>>(
+        serializer: KSerializer<T>,
+        schema: JsonElement,
+        private val validator: (T) -> Unit = {},
+    ) : McpToolParameter<T>(
             name = name,
             description = description,
             required = true,
-        )
+            serializer = serializer,
+            schema = schema,
+        ) {
+        @Suppress("UNCHECKED_CAST")
+        override fun validate(value: Any?) {
+            validator(value as T)
+        }
+    }
 
-    class RequiredString(
+    class Optional<T : Any>(
         name: String,
         description: String,
-    ) : McpToolParameter<String>(
-            name = name,
-            description = description,
-            required = true,
-        )
-
-    class OptionalString(
-        name: String,
-        description: String,
-        val default: String?,
-    ) : McpToolParameter<String?>(
-            name = name,
-            description = description,
-            required = false,
-        )
-
-    class OptionalBoolean(
-        name: String,
-        description: String,
-        val default: Boolean?,
-    ) : McpToolParameter<Boolean?>(
+        serializer: KSerializer<T>,
+        schema: JsonElement,
+        val default: T?,
+        private val validator: (T) -> Unit = {},
+    ) : McpToolParameter<T?>(
             name = name,
             description = description,
             required = false,
-        )
+            serializer = serializer.nullable,
+            schema = schema,
+        ) {
+        @Suppress("UNCHECKED_CAST")
+        override fun validate(value: Any?) {
+            value?.let { presentValue ->
+                validator(presentValue as T)
+            }
+        }
+    }
 
-    class RequiredInt(
+    class OptionalWithDefault<T : Any>(
         name: String,
         description: String,
-        val minimum: Int?,
-        val maximum: Int?,
-    ) : McpToolParameter<Int>(
-            name = name,
-            description = description,
-            required = true,
-        )
-
-    class OptionalInt(
-        name: String,
-        description: String,
-        val minimum: Int?,
-        val maximum: Int?,
-        val default: Int?,
-    ) : McpToolParameter<Int?>(
-            name = name,
-            description = description,
-            required = false,
-        )
-
-    class RequiredStringEnum(
-        name: String,
-        description: String,
-        val values: List<String>,
-    ) : McpToolParameter<String>(
-            name = name,
-            description = description,
-            required = true,
-        )
-
-    class OptionalStringEnum(
-        name: String,
-        description: String,
-        val values: List<String>,
-        val default: String?,
-    ) : McpToolParameter<String?>(
+        serializer: KSerializer<T>,
+        schema: JsonElement,
+        val default: T,
+        private val validator: (T) -> Unit = {},
+    ) : McpToolParameter<T>(
             name = name,
             description = description,
             required = false,
-        )
+            serializer = serializer,
+            schema = schema,
+        ) {
+        @Suppress("UNCHECKED_CAST")
+        override fun validate(value: Any?) {
+            validator(value as T)
+        }
+    }
 }

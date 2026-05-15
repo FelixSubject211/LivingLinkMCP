@@ -25,33 +25,25 @@ class ListShoppingListItemsTool(
             description = "Lists shopping list items with optional filtering, sorting and limit.",
         ) {
             val completed =
-                optionalBoolean(
+                optional<Boolean>(
                     name = "completed",
                     description = "Optional completion status filter.",
                 )
 
             val limit =
-                requiredInt(
+                optionalInt(
                     name = "limit",
                     description = "Maximum number of items to return.",
                     minimum = 1,
                     maximum = 500,
+                    default = 100,
                 )
 
-            val sortBy =
-                optionalStringEnum(
-                    name = "sortBy",
-                    description = "Field to sort by.",
-                    values = listOf("createdAt", "updatedAt", "name"),
-                    default = "createdAt",
-                )
-
-            val sortDirection =
-                optionalStringEnum(
-                    name = "sortDirection",
-                    description = "Sort direction.",
-                    values = listOf("asc", "desc"),
-                    default = "desc",
+            val sort =
+                optional<ShoppingListItemSort>(
+                    name = "sort",
+                    description = "Sort order.",
+                    default = ShoppingListItemSort.CreatedAtDescending,
                 )
 
             handle {
@@ -61,11 +53,7 @@ class ListShoppingListItemsTool(
                             ShoppingListItemQuery(
                                 completed = completed(),
                                 limit = limit(),
-                                sort =
-                                    shoppingListItemSort(
-                                        sortBy = sortBy(),
-                                        sortDirection = sortDirection(),
-                                    ),
+                                sort = sort(),
                             ),
                     )
 
@@ -98,17 +86,3 @@ class ListShoppingListItemsTool(
         }
     }
 }
-
-private fun shoppingListItemSort(
-    sortBy: String?,
-    sortDirection: String?,
-): ShoppingListItemSort =
-    when ((sortBy ?: "createdAt") to (sortDirection ?: "desc")) {
-        "createdAt" to "asc" -> ShoppingListItemSort.CreatedAtAscending
-        "createdAt" to "desc" -> ShoppingListItemSort.CreatedAtDescending
-        "updatedAt" to "asc" -> ShoppingListItemSort.UpdatedAtAscending
-        "updatedAt" to "desc" -> ShoppingListItemSort.UpdatedAtDescending
-        "name" to "asc" -> ShoppingListItemSort.NameAscending
-        "name" to "desc" -> ShoppingListItemSort.NameDescending
-        else -> error("Unsupported sort: sortBy=$sortBy, sortDirection=$sortDirection.")
-    }

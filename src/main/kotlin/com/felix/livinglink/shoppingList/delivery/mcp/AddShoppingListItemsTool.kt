@@ -21,7 +21,7 @@ class AddShoppingListItemsTool(
             description = "Adds one or more items to the shopping list.",
         ) {
             val names =
-                requiredStringList(
+                required<List<String>>(
                     name = "names",
                     description = "Names of the items.",
                 )

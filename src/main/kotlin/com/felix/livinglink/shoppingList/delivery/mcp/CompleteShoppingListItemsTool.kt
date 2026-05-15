@@ -21,7 +21,7 @@ class CompleteShoppingListItemsTool(
             description = "Marks one or more shopping list items as completed.",
         ) {
             val ids =
-                requiredStringList(
+                required<List<String>>(
                     name = "ids",
                     description = "IDs of the items.",
                 )
