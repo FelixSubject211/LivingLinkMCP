@@ -2,6 +2,8 @@
 
 Kotlin MCP server.
 
+This is a personal learning project for me and my family. Everyone is effectively in one shared group. Authentication uses static API keys per user (configured via env vars) because nobody should be able to register themselves, and proper auth flows with Claude are still a bit awkward today, so static keys are the simplest thing that works for the current use case.
+
 ## Requirements
 
 - JDK 21
@@ -23,7 +25,7 @@ Use this mode for the public Cloudflare URL.
 
 ### `.env`
 
-```env
+​```env
 LIVINGLINK_MCP_TRANSPORT=http
 
 LIVINGLINK_MCP_HTTP_HOST=0.0.0.0
@@ -35,26 +37,26 @@ LIVINGLINK_MONGO_CONNECTION_STRING=mongodb://mongo:27017
 LIVINGLINK_MONGO_DATABASE=livinglink
 
 CLOUDFLARE_TUNNEL_TOKEN=CHANGE_ME_CLOUDFLARE_TUNNEL_TOKEN
-```
+​```
 
 ### Start
 
-```bash
+​```bash
 docker compose \
   --env-file .env \
   -f docker-compose.yml \
   -f docker-compose.app.yml \
   -f docker-compose.cloudflare.yml \
   up --build
-```
+​```
 
 ### MCP URL
 
 Use your Cloudflare domain, `/mcp`, and the API key as `key`.
 
-```text
+​```text
 https://your-cloudflare-domain.example/mcp?key=CHANGE_ME_MAX
-```
+​```
 
 ## Mode 2: Stdio for Claude Desktop
 
@@ -62,7 +64,7 @@ Use this mode when Claude Desktop starts livinglink locally through `run-claude-
 
 ### `.env`
 
-```env
+​```env
 LIVINGLINK_MCP_TRANSPORT=stdio
 
 LIVINGLINK_STDIO_USER_ID=max
@@ -70,27 +72,27 @@ LIVINGLINK_STDIO_USERNAME=MaxMusterfrau
 
 LIVINGLINK_MONGO_CONNECTION_STRING=mongodb://localhost:27017
 LIVINGLINK_MONGO_DATABASE=livinglink
-```
+​```
 
 ### Start MongoDB
 
-```bash
+​```bash
 docker compose up -d
-```
+​```
 
 ### Build
 
-```bash
+​```bash
 ./gradlew installDist
-```
+​```
 
 ## local.properties
 
 Create `local.properties` in the project root:
 
-```properties
+​```properties
 projectDir=/absolute/path/to/livinglink
-```
+​```
 
 ## Claude Desktop config
 
@@ -98,13 +100,13 @@ projectDir=/absolute/path/to/livinglink
 
 Edit this file:
 
-```text
+​```text
 ~/Library/Application Support/Claude/claude_desktop_config.json
-```
+​```
 
 Example:
 
-```json
+​```json
 {
     "mcpServers": {
         "livinglink": {
@@ -112,32 +114,32 @@ Example:
         }
     }
 }
-```
+​```
 
 After changing Kotlin code, rebuild:
 
-```bash
+​```bash
 ./gradlew installDist
-```
+​```
 
 ## Mongo Express
 
 When MongoDB is running, Mongo Express is available at:
 
-```text
+​```text
 http://localhost:8081
-```
+​```
 
 ## Lint
 
 Check formatting:
 
-```bash
+​```bash
 ./gradlew ktlintCheck
-```
+​```
 
 Auto-format:
 
-```bash
+​```bash
 ./gradlew ktlintFormat
-```
+​```

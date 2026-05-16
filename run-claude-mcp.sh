@@ -6,11 +6,10 @@ PROJECT_DIR="$(grep '^projectDir=' "$SCRIPT_DIR/local.properties" | cut -d'=' -f
 
 cd "$PROJECT_DIR" || exit 1
 
-export LIVINGLINK_MCP_TRANSPORT=stdio
-export LIVINGLINK_STDIO_USER_ID=felix
-export LIVINGLINK_STDIO_USERNAME=Felix
-export LIVINGLINK_MONGO_CONNECTION_STRING=mongodb://localhost:27017
-export LIVINGLINK_MONGO_DATABASE=livinglink
+set -a
+# shellcheck disable=SC1091
+source "$PROJECT_DIR/.env"
+set +a
 
 ./build/install/livinglink/bin/livinglink \
     | sed -u '/^kotlin-logging: initializing/d'
