@@ -1,4 +1,4 @@
-package com.felix.livinglink.shoppingList.domain
+package com.felix.livinglink.contexts.shoppingList.domain
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

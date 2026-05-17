@@ -1,4 +1,4 @@
-package com.felix.livinglink.shoppingList.database.mongo
+package com.felix.livinglink.contexts.shoppingList.database.mongo
 
 import com.felix.livinglink.core.database.mongo.MongoClientProvider
 import com.mongodb.kotlin.client.coroutine.MongoCollection

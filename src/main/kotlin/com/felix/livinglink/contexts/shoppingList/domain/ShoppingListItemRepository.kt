@@ -1,4 +1,4 @@
-package com.felix.livinglink.shoppingList.domain
+package com.felix.livinglink.contexts.shoppingList.domain
 
 import com.felix.livinglink.core.domain.CrudRepository
 

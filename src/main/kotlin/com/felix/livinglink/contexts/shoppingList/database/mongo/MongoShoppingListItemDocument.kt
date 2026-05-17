@@ -1,7 +1,7 @@
-package com.felix.livinglink.shoppingList.database.mongo
+package com.felix.livinglink.contexts.shoppingList.database.mongo
 
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.core.database.mongo.MongoVersionedDocument
-import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.codecs.pojo.annotations.BsonProperty
 import kotlin.time.Instant

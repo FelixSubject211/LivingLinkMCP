@@ -1,4 +1,4 @@
-package com.felix.livinglink.shoppingList.domain
+package com.felix.livinglink.contexts.shoppingList.domain
 
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -15,6 +15,15 @@ data class ShoppingListItem(
 ) {
     val isCompleted: Boolean
         get() = completionEvents.lastOrNull()?.completed == true
+
+    val referencedUserIds: Set<String>
+        get() =
+            buildSet {
+                add(createdByUserId)
+                completionEvents.forEach { event ->
+                    add(event.byUserId)
+                }
+            }
 
     fun complete(byUserId: String, at: Instant): ShoppingListItem =
         copy(

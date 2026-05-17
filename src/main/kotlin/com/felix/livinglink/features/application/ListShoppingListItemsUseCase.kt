@@ -1,8 +1,8 @@
-package com.felix.livinglink.shoppingList.application
+package com.felix.livinglink.features.application
 
-import com.felix.livinglink.shoppingList.domain.ShoppingListItem
-import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
-import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemQuery
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemRepository
 import org.koin.core.annotation.Single
 
 @Single

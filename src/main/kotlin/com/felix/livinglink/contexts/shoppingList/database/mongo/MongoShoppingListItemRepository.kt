@@ -1,12 +1,12 @@
-package com.felix.livinglink.shoppingList.database.mongo
+package com.felix.livinglink.contexts.shoppingList.database.mongo
 
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemQuery
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemRepository
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.core.database.mongo.MongoCrudRepository
 import com.felix.livinglink.core.domain.CrudRepository
 import com.felix.livinglink.core.domain.MappedCrudRepository
-import com.felix.livinglink.shoppingList.domain.ShoppingListItem
-import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
-import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
-import com.felix.livinglink.shoppingList.domain.ShoppingListItemSort
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.kotlin.client.coroutine.MongoCollection

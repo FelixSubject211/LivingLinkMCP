@@ -1,10 +1,10 @@
-package com.felix.livinglink.shoppingList.delivery.mcp
+package com.felix.livinglink.features.delivery.mcp
 
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
-import com.felix.livinglink.shoppingList.application.CompleteShoppingListItemsUseCase
+import com.felix.livinglink.features.application.CompleteShoppingListItemsUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import org.koin.core.annotation.Single
 

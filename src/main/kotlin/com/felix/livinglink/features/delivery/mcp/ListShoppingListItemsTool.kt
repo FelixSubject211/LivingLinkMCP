@@ -1,13 +1,14 @@
-package com.felix.livinglink.shoppingList.delivery.mcp
+package com.felix.livinglink.features.delivery.mcp
 
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemQuery
+import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
+import com.felix.livinglink.core.delivery.mcp.dsl.resolveUsers
 import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.core.domain.UserLookup
-import com.felix.livinglink.shoppingList.application.ListShoppingListItemsUseCase
-import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
-import com.felix.livinglink.shoppingList.domain.ShoppingListItemSort
+import com.felix.livinglink.features.application.ListShoppingListItemsUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import org.koin.core.annotation.Single
 
@@ -58,26 +59,25 @@ class ListShoppingListItemsTool(
                     )
 
                 success {
+                    val users =
+                        resolveUsers(
+                            userLookup = userLookup,
+                            ids = items.flatMap { item -> item.referencedUserIds },
+                        )
+
                     ifEmpty(items, "No shopping list items found.") {
                         items.forEach { item ->
-                            val createdByName =
-                                userLookup.findById(item.createdByUserId)?.username
-                                    ?: item.createdByUserId
-
                             val lastEvent = item.completionEvents.lastOrNull()
                             val status =
                                 if (item.isCompleted && lastEvent != null) {
-                                    val completedByName =
-                                        userLookup.findById(lastEvent.byUserId)?.username
-                                            ?: lastEvent.byUserId
-                                    "done by $completedByName at ${lastEvent.at}"
+                                    "done by ${users.nameOf(lastEvent.byUserId)} at ${lastEvent.at}"
                                 } else {
                                     "open"
                                 }
 
                             line(
                                 "- [$status] ${item.name} " +
-                                    "(id: ${item.id}, createdBy: $createdByName, createdAt: ${item.createdAt})",
+                                    "(id: ${item.id}, createdBy: ${users.nameOf(item.createdByUserId)}, createdAt: ${item.createdAt})",
                             )
                         }
                     }

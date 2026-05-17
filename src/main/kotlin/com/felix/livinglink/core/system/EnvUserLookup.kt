@@ -1,6 +1,7 @@
 package com.felix.livinglink.core.system
 
 import com.felix.livinglink.core.delivery.mcp.server.McpApiKeySettings
+import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpStdioUserSettings
 import com.felix.livinglink.core.delivery.mcp.server.McpTransport
 import com.felix.livinglink.core.delivery.mcp.server.McpTransportSettings
@@ -14,23 +15,31 @@ class EnvUserLookup(
     private val apiKeySettings: McpApiKeySettings,
     private val stdioUserSettings: McpStdioUserSettings,
 ) : UserLookup {
-    override suspend fun findById(id: String): User? {
-        val mcpUser =
-            when (transportSettings.transport) {
-                McpTransport.Stdio ->
-                    stdioUserSettings.user.takeIf { user ->
-                        user.id == id
-                    }
+    override suspend fun findByIds(ids: List<String>): Map<String, User> {
+        val distinctIds = ids.toSet()
 
-                McpTransport.Http ->
-                    apiKeySettings.userById(id)
+        return when (transportSettings.transport) {
+            McpTransport.Stdio -> {
+                val user = stdioUserSettings.user
+                if (user.id in distinctIds) {
+                    mapOf(user.id to user.toDomain())
+                } else {
+                    emptyMap()
+                }
             }
 
-        return mcpUser?.let { user ->
-            User(
-                id = user.id,
-                username = user.username,
-            )
+            McpTransport.Http ->
+                apiKeySettings
+                    .usersByIds(distinctIds.toList())
+                    .mapValues { (_, user) ->
+                        user.toDomain()
+                    }
         }
     }
+
+    private fun McpRequestUser.toDomain(): User =
+        User(
+            id = id,
+            username = username,
+        )
 }
