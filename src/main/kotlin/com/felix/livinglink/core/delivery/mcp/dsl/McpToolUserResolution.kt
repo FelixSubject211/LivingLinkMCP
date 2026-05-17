@@ -1,9 +1,10 @@
 package com.felix.livinglink.core.delivery.mcp.dsl
 
+import com.felix.livinglink.core.domain.User
 import com.felix.livinglink.core.domain.UserLookup
 
 class ResolvedUsers(
-    private val usersById: Map<String, com.felix.livinglink.core.domain.User>,
+    private val usersById: Map<String, User>,
 ) {
     fun nameOf(id: String): String =
         usersById[id]?.username ?: id
