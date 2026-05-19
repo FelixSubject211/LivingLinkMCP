@@ -5,6 +5,7 @@ import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.resolveUsers
 import com.felix.livinglink.core.delivery.mcp.dsl.success
+import com.felix.livinglink.core.delivery.mcp.dsl.toMcpString
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.core.domain.UserLookup
@@ -70,14 +71,14 @@ class ListShoppingListItemsTool(
                             val lastEvent = item.completionEvents.lastOrNull()
                             val status =
                                 if (item.isCompleted && lastEvent != null) {
-                                    "done by ${users.nameOf(lastEvent.byUserId)} at ${lastEvent.at}"
+                                    "done by ${users.nameOf(lastEvent.byUserId)} at ${lastEvent.at.toMcpString()}"
                                 } else {
                                     "open"
                                 }
 
                             line(
                                 "- [$status] ${item.name} " +
-                                    "(id: ${item.id}, createdBy: ${users.nameOf(item.createdByUserId)}, createdAt: ${item.createdAt})",
+                                    "(id: ${item.id}, createdBy: ${users.nameOf(item.createdByUserId)}, createdAt: ${item.createdAt.toMcpString()})",
                             )
                         }
                     }

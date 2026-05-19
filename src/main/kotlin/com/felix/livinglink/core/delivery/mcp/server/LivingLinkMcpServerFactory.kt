@@ -24,6 +24,7 @@ class LivingLinkMcpServerFactory(
                             tools = ServerCapabilities.Tools(listChanged = true),
                         ),
                 ),
+            instructions = "All timestamps are in UTC. Always convert them to the user's local time when displaying.",
         ).also { server ->
             toolRegistrars.forEach { toolRegistrar ->
                 toolRegistrar.register(
