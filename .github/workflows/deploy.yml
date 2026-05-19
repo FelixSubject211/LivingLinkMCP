@@ -1,0 +1,31 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/livinglink
+            git pull origin master
+            docker compose \
+              --env-file .env \
+              -f docker-compose.yml \
+              -f docker-compose.app.yml \
+              -f docker-compose.cloudflare.yml \
+              down
+            docker compose \
+              --env-file .env \
+              -f docker-compose.yml \
+              -f docker-compose.app.yml \
+              -f docker-compose.cloudflare.yml \
+              up --build -d
