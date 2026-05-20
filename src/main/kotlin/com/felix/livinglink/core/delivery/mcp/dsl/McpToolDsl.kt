@@ -3,6 +3,9 @@ package com.felix.livinglink.core.delivery.mcp.dsl
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
+import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger("McpToolDsl")
 
 object McpToolDsl {
     fun Server.tool(
@@ -35,6 +38,7 @@ object McpToolDsl {
 
                 definition.handler.invoke(arguments)
             }.getOrElse { exception ->
+                logger.error("Tool '${definition.name}' failed", exception)
                 toolError(exception.toToolErrorMessage())
             }
         }

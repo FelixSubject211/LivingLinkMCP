@@ -7,6 +7,9 @@ import io.ktor.server.routing.routing
 import io.modelcontextprotocol.kotlin.sdk.server.mcpStreamableHttp
 import kotlinx.coroutines.Job
 import org.koin.core.annotation.Single
+import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger("McpServerRunner")
 
 @Single
 class McpServerRunner(
@@ -66,6 +69,10 @@ class McpServerRunner(
                             ?.let { key ->
                                 apiKeySettings.userForApiKey(key)
                             }
+
+                    if (user == null) {
+                        logger.error("Missing or invalid MCP API key: $apiKey")
+                    }
 
                     requireNotNull(user) {
                         "Missing or invalid MCP API key."
