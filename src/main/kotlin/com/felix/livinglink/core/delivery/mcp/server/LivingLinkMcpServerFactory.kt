@@ -1,5 +1,6 @@
 package com.felix.livinglink.core.delivery.mcp.server
 
+import com.felix.livinglink.core.system.TimezoneSettings
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
@@ -9,6 +10,7 @@ import org.koin.core.annotation.Single
 @Single(binds = [McpServerFactory::class])
 class LivingLinkMcpServerFactory(
     private val toolRegistrars: List<McpToolRegistrar>,
+    private val timezoneSettings: TimezoneSettings,
 ) : McpServerFactory {
     override fun create(user: McpRequestUser): Server =
         Server(
@@ -24,7 +26,7 @@ class LivingLinkMcpServerFactory(
                             tools = ServerCapabilities.Tools(listChanged = true),
                         ),
                 ),
-            instructions = "All timestamps are in UTC. Always convert them to the user's local time when displaying.",
+            instructions = "All timestamps are in ${timezoneSettings.timezoneId}. Display them as-is without conversion.",
         ).also { server ->
             toolRegistrars.forEach { toolRegistrar ->
                 toolRegistrar.register(

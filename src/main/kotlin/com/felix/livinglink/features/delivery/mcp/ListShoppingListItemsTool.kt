@@ -9,6 +9,7 @@ import com.felix.livinglink.core.delivery.mcp.dsl.toMcpString
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.core.domain.UserLookup
+import com.felix.livinglink.core.system.TimezoneSettings
 import com.felix.livinglink.features.application.ListShoppingListItemsUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import org.koin.core.annotation.Single
@@ -17,6 +18,7 @@ import org.koin.core.annotation.Single
 class ListShoppingListItemsTool(
     private val listShoppingListItemsUseCase: ListShoppingListItemsUseCase,
     private val userLookup: UserLookup,
+    private val timezoneSettings: TimezoneSettings,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -71,14 +73,14 @@ class ListShoppingListItemsTool(
                             val lastEvent = item.completionEvents.lastOrNull()
                             val status =
                                 if (item.isCompleted && lastEvent != null) {
-                                    "done by ${users.nameOf(lastEvent.byUserId)} at ${lastEvent.at.toMcpString()}"
+                                    "done by ${users.nameOf(lastEvent.byUserId)} at ${lastEvent.at.toMcpString(timezoneSettings)}"
                                 } else {
                                     "open"
                                 }
 
                             line(
                                 "- [$status] ${item.name} " +
-                                    "(id: ${item.id}, createdBy: ${users.nameOf(item.createdByUserId)}, createdAt: ${item.createdAt.toMcpString()})",
+                                    "(id: ${item.id}, createdBy: ${users.nameOf(item.createdByUserId)}, createdAt: ${item.createdAt.toMcpString(timezoneSettings)})",
                             )
                         }
                     }
