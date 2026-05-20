@@ -16,7 +16,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/livinglink
-            git pull origin master
+            git fetch origin master
+            git reset --hard origin/master
             docker compose \
               --env-file .env \
               -f docker-compose.yml \
