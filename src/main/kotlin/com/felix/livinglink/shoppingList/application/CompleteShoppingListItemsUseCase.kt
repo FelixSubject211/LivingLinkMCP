@@ -1,7 +1,8 @@
 package com.felix.livinglink.shoppingList.application
 
-import com.felix.livinglink.core.domain.CrudRepository
 import com.felix.livinglink.core.domain.TimeProvider
+import com.felix.livinglink.core.domain.UpdateOperationResult
+import com.felix.livinglink.core.domain.UpdateResult
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
 import org.koin.core.annotation.Single
@@ -17,21 +18,21 @@ class CompleteShoppingListItemsUseCase(
                 val result =
                     shoppingListItemRepository.updateWithOptimisticLocking(id) { current ->
                         if (current.isCompleted) {
-                            CrudRepository.UpdateOperationResult.noUpdate(current = current)
+                            UpdateOperationResult.noUpdate(current = current)
                         } else {
                             val completed =
                                 current.complete(
                                     byUserId = input.byUserId,
                                     at = timeProvider(),
                                 )
-                            CrudRepository.UpdateOperationResult.updated(newEntity = completed)
+                            UpdateOperationResult.updated(newEntity = completed)
                         }
                     }
 
                 when (result) {
-                    is CrudRepository.UpdateResult.NotFound -> ItemResult.Missing(id)
-                    is CrudRepository.UpdateResult.NotUpdated -> ItemResult.AlreadyCompleted(result.response)
-                    is CrudRepository.UpdateResult.Updated -> ItemResult.Completed(result.newEntity)
+                    is UpdateResult.NotFound -> ItemResult.Missing(id)
+                    is UpdateResult.NotUpdated -> ItemResult.AlreadyCompleted(result.response)
+                    is UpdateResult.Updated -> ItemResult.Completed(result.newEntity)
                 }
             }
 

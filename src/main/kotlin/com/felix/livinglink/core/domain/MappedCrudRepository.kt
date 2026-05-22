@@ -17,17 +17,17 @@ class MappedCrudRepository<TDomain, TStorage>(
 
     override suspend fun <TResponse> updateWithOptimisticLocking(
         id: String,
-        modify: (TDomain) -> CrudRepository.UpdateOperationResult<TDomain, TResponse>,
-    ): CrudRepository.UpdateResult<TDomain, TResponse> {
+        modify: (TDomain) -> UpdateOperationResult<TDomain, TResponse>,
+    ): UpdateResult<TDomain, TResponse> {
         val storageResult =
             storageRepository.updateWithOptimisticLocking(id) { storageCurrent ->
                 val domainCurrent = toDomain(storageCurrent)
                 when (val operation = modify(domainCurrent)) {
-                    is CrudRepository.UpdateOperationResult.NoUpdate ->
-                        CrudRepository.UpdateOperationResult.NoUpdate(operation.response)
+                    is UpdateOperationResult.NoUpdate ->
+                        UpdateOperationResult.NoUpdate(operation.response)
 
-                    is CrudRepository.UpdateOperationResult.Updated ->
-                        CrudRepository.UpdateOperationResult.Updated(
+                    is UpdateOperationResult.Updated ->
+                        UpdateOperationResult.Updated(
                             newEntity = toStorage(operation.newEntity),
                             response = operation.response,
                         )
@@ -35,14 +35,14 @@ class MappedCrudRepository<TDomain, TStorage>(
             }
 
         return when (storageResult) {
-            is CrudRepository.UpdateResult.NotFound ->
-                CrudRepository.UpdateResult.NotFound
+            is UpdateResult.NotFound ->
+                UpdateResult.NotFound
 
-            is CrudRepository.UpdateResult.NotUpdated ->
-                CrudRepository.UpdateResult.NotUpdated(storageResult.response)
+            is UpdateResult.NotUpdated ->
+                UpdateResult.NotUpdated(storageResult.response)
 
-            is CrudRepository.UpdateResult.Updated ->
-                CrudRepository.UpdateResult.Updated(
+            is UpdateResult.Updated ->
+                UpdateResult.Updated(
                     newEntity = toDomain(storageResult.newEntity),
                     response = storageResult.response,
                 )

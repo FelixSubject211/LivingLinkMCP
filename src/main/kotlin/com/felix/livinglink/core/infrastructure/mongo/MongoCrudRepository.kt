@@ -1,6 +1,8 @@
 package com.felix.livinglink.core.infrastructure.mongo
 
 import com.felix.livinglink.core.domain.CrudRepository
+import com.felix.livinglink.core.domain.UpdateOperationResult
+import com.felix.livinglink.core.domain.UpdateResult
 import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.kotlin.client.coroutine.MongoCollection
@@ -30,18 +32,18 @@ class MongoCrudRepository<TDocument : MongoVersionedDocument<TDocument>>(
 
     override suspend fun <TResponse> updateWithOptimisticLocking(
         id: String,
-        modify: (TDocument) -> CrudRepository.UpdateOperationResult<TDocument, TResponse>,
-    ): CrudRepository.UpdateResult<TDocument, TResponse> {
+        modify: (TDocument) -> UpdateOperationResult<TDocument, TResponse>,
+    ): UpdateResult<TDocument, TResponse> {
         repeat(maxOptimisticLockAttempts) {
             val current =
                 findById(id)
-                    ?: return CrudRepository.UpdateResult.NotFound
+                    ?: return UpdateResult.NotFound
 
             when (val operation = modify(current)) {
-                is CrudRepository.UpdateOperationResult.NoUpdate ->
-                    return CrudRepository.UpdateResult.NotUpdated(operation.response)
+                is UpdateOperationResult.NoUpdate ->
+                    return UpdateResult.NotUpdated(operation.response)
 
-                is CrudRepository.UpdateOperationResult.Updated -> {
+                is UpdateOperationResult.Updated -> {
                     val updatedDocument = operation.newEntity.withVersion(current.version + 1)
 
                     val result =
@@ -55,7 +57,7 @@ class MongoCrudRepository<TDocument : MongoVersionedDocument<TDocument>>(
                         )
 
                     if (result.modifiedCount == 1L) {
-                        return CrudRepository.UpdateResult.Updated(
+                        return UpdateResult.Updated(
                             newEntity = updatedDocument,
                             response = operation.response,
                         )
