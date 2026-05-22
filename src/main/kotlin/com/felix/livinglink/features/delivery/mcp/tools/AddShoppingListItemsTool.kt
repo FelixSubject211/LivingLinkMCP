@@ -1,4 +1,4 @@
-package com.felix.livinglink.features.delivery.mcp
+package com.felix.livinglink.features.delivery.mcp.tools
 
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
@@ -27,14 +27,16 @@ class AddShoppingListItemsTool(
                 )
 
             handle {
-                val items =
+                val output =
                     addShoppingListItemsUseCase(
-                        byUserId = user.id,
-                        names = names(),
+                        AddShoppingListItemsUseCase.Input(
+                            byUserId = user.id,
+                            names = names(),
+                        ),
                     )
 
                 success {
-                    items.forEach { item ->
+                    output.items.forEach { item ->
                         line("- Added '${item.name}' with id '${item.id}'.")
                     }
                 }

@@ -1,7 +1,6 @@
-package com.felix.livinglink.features.delivery.mcp
+package com.felix.livinglink.features.delivery.mcp.tools
 
 import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemQuery
-import com.felix.livinglink.contexts.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.resolveUsers
 import com.felix.livinglink.core.delivery.mcp.dsl.success
@@ -11,6 +10,7 @@ import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.core.domain.UserLookup
 import com.felix.livinglink.core.system.TimezoneSettings
 import com.felix.livinglink.features.application.ListShoppingListItemsUseCase
+import com.felix.livinglink.features.delivery.mcp.dto.ShoppingListItemSortMcpDto
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import org.koin.core.annotation.Single
 
@@ -44,32 +44,34 @@ class ListShoppingListItemsTool(
                 )
 
             val sort =
-                optional<ShoppingListItemSort>(
+                optional<ShoppingListItemSortMcpDto>(
                     name = "sort",
                     description = "Sort order.",
-                    default = ShoppingListItemSort.CreatedAtDescending,
+                    default = ShoppingListItemSortMcpDto.CreatedAtDescending,
                 )
 
             handle {
-                val items =
+                val output =
                     listShoppingListItemsUseCase(
-                        query =
-                            ShoppingListItemQuery(
-                                completed = completed(),
-                                limit = limit(),
-                                sort = sort(),
-                            ),
+                        ListShoppingListItemsUseCase.Input(
+                            query =
+                                ShoppingListItemQuery(
+                                    completed = completed(),
+                                    limit = limit(),
+                                    sort = sort().toDomain(),
+                                ),
+                        ),
                     )
 
                 success {
                     val users =
                         resolveUsers(
                             userLookup = userLookup,
-                            ids = items.flatMap { item -> item.referencedUserIds },
+                            ids = output.items.flatMap { item -> item.referencedUserIds },
                         )
 
-                    ifEmpty(items, "No shopping list items found.") {
-                        items.forEach { item ->
+                    ifEmpty(output.items, "No shopping list items found.") {
+                        output.items.forEach { item ->
                             val lastEvent = item.completionEvents.lastOrNull()
                             val status =
                                 if (item.isCompleted && lastEvent != null) {

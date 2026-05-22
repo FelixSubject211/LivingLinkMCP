@@ -1,4 +1,4 @@
-package com.felix.livinglink.features.delivery.mcp
+package com.felix.livinglink.features.delivery.mcp.tools
 
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
@@ -27,22 +27,22 @@ class CompleteShoppingListItemsTool(
                 )
 
             handle {
-                val result =
+                val output =
                     completeShoppingListItemsUseCase(
-                        byUserId = user.id,
-                        ids = ids(),
+                        CompleteShoppingListItemsUseCase.Input(
+                            byUserId = user.id,
+                            ids = ids(),
+                        ),
                     )
 
                 success {
-                    result.completedItems.forEach { item ->
+                    output.completedItems.forEach { item ->
                         line("- Completed '${item.name}'.")
                     }
-
-                    result.alreadyCompletedItems.forEach { item ->
+                    output.alreadyCompletedItems.forEach { item ->
                         line("- '${item.name}' was already completed.")
                     }
-
-                    result.missingIds.forEach { id ->
+                    output.missingIds.forEach { id ->
                         line("- Item with id '$id' was not found.")
                     }
                 }
