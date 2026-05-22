@@ -1,4 +1,4 @@
-package com.felix.livinglink.core.delivery.mcp.dsl
+package com.felix.livinglink.user.delivery.mcp
 
 import com.felix.livinglink.user.domain.User
 import com.felix.livinglink.user.domain.UserLookup
@@ -10,7 +10,7 @@ class ResolvedUsers(
         usersById[id]?.username ?: id
 }
 
-suspend fun McpToolResponseBuilder.resolveUsers(
+suspend fun resolveUsers(
     userLookup: UserLookup,
     ids: Iterable<String>,
 ): ResolvedUsers =

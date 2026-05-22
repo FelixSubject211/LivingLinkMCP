@@ -1,7 +1,6 @@
 package com.felix.livinglink.shoppingList.delivery.mcp.tools
 
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
-import com.felix.livinglink.core.delivery.mcp.dsl.resolveUsers
 import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.dsl.toMcpString
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
@@ -10,6 +9,7 @@ import com.felix.livinglink.core.infrastructure.system.TimezoneSettings
 import com.felix.livinglink.shoppingList.application.ListShoppingListItemsUseCase
 import com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemSortMcpDto
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
+import com.felix.livinglink.user.delivery.mcp.resolveUsers
 import com.felix.livinglink.user.domain.UserLookup
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import org.koin.core.annotation.Single
