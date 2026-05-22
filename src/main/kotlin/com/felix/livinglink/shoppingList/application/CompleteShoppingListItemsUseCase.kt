@@ -1,7 +1,7 @@
 package com.felix.livinglink.shoppingList.application
 
+import com.felix.livinglink.core.domain.CrudRepository
 import com.felix.livinglink.core.domain.TimeProvider
-import com.felix.livinglink.core.domain.retryOptimisticLock
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
 import org.koin.core.annotation.Single
@@ -12,37 +12,48 @@ class CompleteShoppingListItemsUseCase(
     private val timeProvider: TimeProvider,
 ) {
     suspend operator fun invoke(input: Input): Output {
-        val completedItems = mutableListOf<ShoppingListItem>()
-        val alreadyCompletedItems = mutableListOf<ShoppingListItem>()
-        val missingIds = mutableListOf<String>()
+        val results =
+            input.ids.distinct().map { id ->
+                val result =
+                    shoppingListItemRepository.updateWithOptimisticLocking(id) { current ->
+                        if (current.isCompleted) {
+                            CrudRepository.UpdateOperationResult.noUpdate(current = current)
+                        } else {
+                            val completed =
+                                current.complete(
+                                    byUserId = input.byUserId,
+                                    at = timeProvider(),
+                                )
+                            CrudRepository.UpdateOperationResult.updated(newEntity = completed)
+                        }
+                    }
 
-        input.ids.distinct().forEach { id ->
-            retryOptimisticLock {
-                val item =
-                    shoppingListItemRepository.findById(id) ?: run {
-                        missingIds += id
-                        return@retryOptimisticLock
-                    }
-                if (item.isCompleted) {
-                    alreadyCompletedItems += item
-                    return@retryOptimisticLock
+                when (result) {
+                    is CrudRepository.UpdateResult.NotFound -> ItemResult.Missing(id)
+                    is CrudRepository.UpdateResult.NotUpdated -> ItemResult.AlreadyCompleted(result.response)
+                    is CrudRepository.UpdateResult.Updated -> ItemResult.Completed(result.newEntity)
                 }
-                val completedItem =
-                    shoppingListItemRepository.update(
-                        item.complete(byUserId = input.byUserId, at = timeProvider()),
-                    ) ?: run {
-                        missingIds += id
-                        return@retryOptimisticLock
-                    }
-                completedItems += completedItem
             }
-        }
 
         return Output(
-            completedItems = completedItems.toList(),
-            alreadyCompletedItems = alreadyCompletedItems.toList(),
-            missingIds = missingIds.toList(),
+            completedItems = results.filterIsInstance<ItemResult.Completed>().map { it.item },
+            alreadyCompletedItems = results.filterIsInstance<ItemResult.AlreadyCompleted>().map { it.item },
+            missingIds = results.filterIsInstance<ItemResult.Missing>().map { it.id },
         )
+    }
+
+    private sealed class ItemResult {
+        data class Completed(
+            val item: ShoppingListItem,
+        ) : ItemResult()
+
+        data class AlreadyCompleted(
+            val item: ShoppingListItem,
+        ) : ItemResult()
+
+        data class Missing(
+            val id: String,
+        ) : ItemResult()
     }
 
     data class Input(
