@@ -1,6 +1,6 @@
 package com.felix.livinglink.core.delivery.mcp.server
 
-import com.felix.livinglink.core.system.Env
+import com.felix.livinglink.core.infrastructure.system.Env
 import org.koin.core.annotation.Single
 
 @Single

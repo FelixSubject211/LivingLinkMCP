@@ -1,6 +1,6 @@
 package com.felix.livinglink.core.delivery.mcp.dsl
 
-import com.felix.livinglink.core.system.TimezoneSettings
+import com.felix.livinglink.core.infrastructure.system.TimezoneSettings
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import kotlin.time.Instant

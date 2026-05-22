@@ -1,6 +1,6 @@
 package com.felix.livinglink.core.delivery.mcp.server
 
-import com.felix.livinglink.core.database.mongo.MongoClientProvider
+import com.felix.livinglink.core.infrastructure.mongo.MongoClientProvider
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
