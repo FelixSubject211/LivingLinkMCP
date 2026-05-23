@@ -8,9 +8,8 @@ import com.felix.livinglink.core.infrastructure.system.TimezoneSettings
 import com.felix.livinglink.shoppingList.application.ListShoppingListItemsUseCase
 import com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemDetailMcpDto
 import com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemSortMcpDto
-import com.felix.livinglink.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.shoppingList.delivery.mcp.dto.toMcpDetailDto
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
-import com.felix.livinglink.user.delivery.mcp.ResolvedUsers
 import com.felix.livinglink.user.delivery.mcp.resolveUsers
 import com.felix.livinglink.user.domain.UserLookup
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -69,14 +68,18 @@ class ListShoppingListItemsTool(
                 val resolvedUsers =
                     resolveUsers(
                         userLookup = userLookup,
-                        ids = output.items.flatMap { item -> item.referencedUserIds },
+                        ids = output.items.flatMap { it.referencedUserIds },
                     )
 
                 success(
-                    Output.fromDomain(
-                        items = output.items,
-                        resolvedUsers = resolvedUsers,
-                        timezoneSettings = timezoneSettings,
+                    Output(
+                        items =
+                            output.items.map { item ->
+                                item.toMcpDetailDto(
+                                    resolvedUsers = resolvedUsers,
+                                    timezoneSettings = timezoneSettings,
+                                )
+                            },
                     ),
                 )
             }
@@ -86,23 +89,5 @@ class ListShoppingListItemsTool(
     @Serializable
     private data class Output(
         val items: List<ShoppingListItemDetailMcpDto>,
-    ) {
-        companion object {
-            fun fromDomain(
-                items: List<ShoppingListItem>,
-                resolvedUsers: ResolvedUsers,
-                timezoneSettings: TimezoneSettings,
-            ): Output =
-                Output(
-                    items =
-                        items.map { item ->
-                            ShoppingListItemDetailMcpDto.fromDomain(
-                                item = item,
-                                resolvedUsers = resolvedUsers,
-                                timezoneSettings = timezoneSettings,
-                            )
-                        },
-                )
-        }
-    }
+    )
 }

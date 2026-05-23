@@ -7,12 +7,10 @@ import kotlinx.serialization.Serializable
 data class ShoppingListItemReferenceMcpDto(
     val id: String,
     val name: String,
-) {
-    companion object {
-        fun fromDomain(item: ShoppingListItem): ShoppingListItemReferenceMcpDto =
-            ShoppingListItemReferenceMcpDto(
-                id = item.id,
-                name = item.name,
-            )
-    }
-}
+)
+
+fun ShoppingListItem.toMcpReferenceDto(): ShoppingListItemReferenceMcpDto =
+    ShoppingListItemReferenceMcpDto(
+        id = id,
+        name = name,
+    )

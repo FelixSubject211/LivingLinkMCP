@@ -5,8 +5,7 @@ import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.shoppingList.application.AddShoppingListItemsUseCase
-import com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemReferenceMcpDto
-import com.felix.livinglink.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.shoppingList.delivery.mcp.dto.toMcpReferenceDto
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
@@ -39,8 +38,9 @@ class AddShoppingListItemsTool(
                     )
 
                 success(
-                    Output.fromDomain(
-                        items = output.items,
+                    Output(
+                        addedItems =
+                            output.items.map { it.toMcpReferenceDto() },
                     ),
                 )
             }
@@ -49,16 +49,6 @@ class AddShoppingListItemsTool(
 
     @Serializable
     private data class Output(
-        val addedItems: List<ShoppingListItemReferenceMcpDto>,
-    ) {
-        companion object {
-            fun fromDomain(items: List<ShoppingListItem>): Output =
-                Output(
-                    addedItems =
-                        items.map { item ->
-                            ShoppingListItemReferenceMcpDto.fromDomain(item)
-                        },
-                )
-        }
-    }
+        val addedItems: List<com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemReferenceMcpDto>,
+    )
 }
