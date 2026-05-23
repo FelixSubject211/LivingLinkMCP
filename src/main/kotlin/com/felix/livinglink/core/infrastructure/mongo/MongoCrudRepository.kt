@@ -7,6 +7,9 @@ import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
+import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger("MongoCrudRepository")
 
 class MongoCrudRepository<TDocument : MongoVersionedDocument<TDocument>>(
     private val collection: MongoCollection<TDocument>,
@@ -69,6 +72,7 @@ class MongoCrudRepository<TDocument : MongoVersionedDocument<TDocument>>(
             }
         }
 
-        error("$entityName '$id' could not be updated after $maxOptimisticLockAttempts attempts.")
+        logger.error("$entityName '$id' could not be updated after $maxOptimisticLockAttempts attempts.")
+        return UpdateResult.OptimisticLockingError
     }
 }

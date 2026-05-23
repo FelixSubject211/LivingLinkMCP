@@ -41,6 +41,9 @@ class MappedCrudRepository<TDomain, TStorage>(
             is UpdateResult.NotUpdated ->
                 UpdateResult.NotUpdated(storageResult.response)
 
+            is UpdateResult.OptimisticLockingError ->
+                UpdateResult.OptimisticLockingError
+
             is UpdateResult.Updated ->
                 UpdateResult.Updated(
                     newEntity = toDomain(storageResult.newEntity),

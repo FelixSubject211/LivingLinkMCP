@@ -40,5 +40,7 @@ sealed class UpdateResult<out T, out TResponse> {
         val response: TResponse,
     ) : UpdateResult<Nothing, TResponse>()
 
+    data object OptimisticLockingError : UpdateResult<Nothing, Nothing>()
+
     data object NotFound : UpdateResult<Nothing, Nothing>()
 }

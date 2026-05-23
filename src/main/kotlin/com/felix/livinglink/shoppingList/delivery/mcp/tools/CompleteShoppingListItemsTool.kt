@@ -43,6 +43,7 @@ class CompleteShoppingListItemsTool(
                         completedItems = output.completedItems,
                         alreadyCompletedItems = output.alreadyCompletedItems,
                         missingIds = output.missingIds,
+                        conflictedIds = output.conflictedIds,
                     ),
                 )
             }
@@ -54,12 +55,14 @@ class CompleteShoppingListItemsTool(
         val completedItems: List<ShoppingListItemReferenceMcpDto>,
         val alreadyCompletedItems: List<ShoppingListItemReferenceMcpDto>,
         val missingIds: List<String>,
+        val conflictedIds: List<String>,
     ) {
         companion object {
             fun fromDomain(
                 completedItems: List<ShoppingListItem>,
                 alreadyCompletedItems: List<ShoppingListItem>,
                 missingIds: List<String>,
+                conflictedIds: List<String>,
             ): Output =
                 Output(
                     completedItems =
@@ -71,6 +74,7 @@ class CompleteShoppingListItemsTool(
                             ShoppingListItemReferenceMcpDto.fromDomain(item)
                         },
                     missingIds = missingIds,
+                    conflictedIds = conflictedIds,
                 )
         }
     }

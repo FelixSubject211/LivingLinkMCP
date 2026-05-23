@@ -31,6 +31,7 @@ class CompleteShoppingListItemsUseCase(
 
                 when (result) {
                     is UpdateResult.NotFound -> ItemResult.Missing(id)
+                    is UpdateResult.OptimisticLockingError -> ItemResult.Conflict(id)
                     is UpdateResult.NotUpdated -> ItemResult.AlreadyCompleted(result.response)
                     is UpdateResult.Updated -> ItemResult.Completed(result.newEntity)
                 }
@@ -40,6 +41,7 @@ class CompleteShoppingListItemsUseCase(
             completedItems = results.filterIsInstance<ItemResult.Completed>().map { it.item },
             alreadyCompletedItems = results.filterIsInstance<ItemResult.AlreadyCompleted>().map { it.item },
             missingIds = results.filterIsInstance<ItemResult.Missing>().map { it.id },
+            conflictedIds = results.filterIsInstance<ItemResult.Conflict>().map { it.id },
         )
     }
 
@@ -55,6 +57,10 @@ class CompleteShoppingListItemsUseCase(
         data class Missing(
             val id: String,
         ) : ItemResult()
+
+        data class Conflict(
+            val id: String,
+        ) : ItemResult()
     }
 
     data class Input(
@@ -66,5 +72,6 @@ class CompleteShoppingListItemsUseCase(
         val completedItems: List<ShoppingListItem>,
         val alreadyCompletedItems: List<ShoppingListItem>,
         val missingIds: List<String>,
+        val conflictedIds: List<String>,
     )
 }
