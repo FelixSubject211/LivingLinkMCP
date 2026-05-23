@@ -45,4 +45,14 @@ class NamingConventionsTest {
             .filter { it.isTopLevel }
             .assertTrue { it.name.endsWith("McpDto") }
     }
+
+    @Test
+    fun `top-level MCP DTO interfaces in dto packages end with 'McpDto'`() {
+        Konsist
+            .scopeFromProduction()
+            .interfaces()
+            .filter { it.resideInPackage("..delivery.mcp.dto..") }
+            .filter { it.isTopLevel }
+            .assertTrue { it.name.endsWith("McpDto") }
+    }
 }

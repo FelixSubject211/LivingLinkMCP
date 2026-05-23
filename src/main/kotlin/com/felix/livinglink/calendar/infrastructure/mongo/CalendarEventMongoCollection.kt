@@ -1,4 +1,4 @@
-package com.felix.livinglink.shoppingList.infrastructure.mongo
+package com.felix.livinglink.calendar.infrastructure.mongo
 
 import com.felix.livinglink.core.infrastructure.mongo.MongoClientProvider
 import com.mongodb.kotlin.client.coroutine.MongoCollection
@@ -6,10 +6,10 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
 @Single
-@Named("shoppingListItems")
-fun shoppingListItemMongoCollection(
+@Named("calendarEvents")
+fun calendarEventMongoCollection(
     mongoClientProvider: MongoClientProvider,
-): MongoCollection<MongoShoppingListItemDocument> =
+): MongoCollection<MongoCalendarEventDocument> =
     mongoClientProvider
         .database()
-        .getCollection<MongoShoppingListItemDocument>("shopping_list_items")
+        .getCollection<MongoCalendarEventDocument>("calendar_events")

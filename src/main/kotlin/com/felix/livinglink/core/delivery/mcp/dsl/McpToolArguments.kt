@@ -8,6 +8,7 @@ class McpToolArguments(
     private val json: Json =
         Json {
             ignoreUnknownKeys = true
+            classDiscriminator = McpToolSchemaBuilder.SEALED_DISCRIMINATOR
         },
 ) {
     operator fun <T> McpToolParameter<T>.invoke(): T =

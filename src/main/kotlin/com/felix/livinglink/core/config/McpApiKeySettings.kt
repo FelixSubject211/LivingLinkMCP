@@ -57,4 +57,7 @@ class McpApiKeySettings {
                     id to user
                 }
             }.toMap()
+
+    fun allUsers(): List<McpRequestUser> =
+        usersById.values.toList()
 }

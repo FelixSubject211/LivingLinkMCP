@@ -2,10 +2,12 @@ package com.felix.livinglink.core.delivery.mcp.dsl
 
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
@@ -18,6 +20,8 @@ import kotlinx.serialization.serializer
 import kotlin.math.pow
 
 object McpToolSchemaBuilder {
+    const val SEALED_DISCRIMINATOR = "type"
+
     fun build(parameters: List<McpToolParameter<*>>): ToolSchema =
         ToolSchema(
             properties =
@@ -156,6 +160,13 @@ object McpToolSchemaBuilder {
                     }
                 }
 
+            StructureKind.OBJECT ->
+                buildJsonObject {
+                    put("type", "object")
+                    putJsonObject("properties") {}
+                    putJsonArray("required") {}
+                }
+
             SerialKind.ENUM ->
                 buildJsonObject {
                     put("type", "string")
@@ -167,8 +178,66 @@ object McpToolSchemaBuilder {
                     }
                 }
 
+            PolymorphicKind.SEALED -> sealedSchemaFor(descriptor)
+
             else ->
                 error("Unsupported MCP parameter type: ${descriptor.serialName}")
+        }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun sealedSchemaFor(descriptor: SerialDescriptor): JsonElement {
+        val valueIndex =
+            (0 until descriptor.elementsCount)
+                .firstOrNull { index ->
+                    descriptor.getElementName(index) == "value"
+                } ?: 1
+        val subclassesContainer = descriptor.getElementDescriptor(valueIndex)
+
+        return buildJsonObject {
+            putJsonArray("oneOf") {
+                repeat(subclassesContainer.elementsCount) { index ->
+                    val subclassDescriptor = subclassesContainer.getElementDescriptor(index)
+                    val serialName = subclassDescriptor.serialName
+
+                    val branchSchema = schemaFor(subclassDescriptor).jsonObject
+
+                    add(
+                        buildJsonObject {
+                            branchSchema.forEach { entry ->
+                                if (entry.key != "properties" && entry.key != "required") {
+                                    put(entry.key, entry.value)
+                                }
+                            }
+
+                            putJsonObject("properties") {
+                                put(
+                                    SEALED_DISCRIMINATOR,
+                                    buildJsonObject {
+                                        put("type", "string")
+                                        put("const", serialName)
+                                    },
+                                )
+
+                                branchSchema["properties"]?.jsonObject?.forEach { entry ->
+                                    put(entry.key, entry.value)
+                                }
+                            }
+
+                            putJsonArray("required") {
+                                add(SEALED_DISCRIMINATOR)
+
+                                val branchRequired = branchSchema["required"]
+                                if (branchRequired is JsonArray) {
+                                    branchRequired.forEach { element ->
+                                        add(element)
+                                    }
+                                }
+                            }
+                        },
+                    )
+                }
+            }
         }
     }
 }

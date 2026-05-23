@@ -11,10 +11,12 @@ import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.toList
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
 @Single(binds = [ShoppingListItemRepository::class])
 class MongoShoppingListItemRepository(
+    @Named("shoppingListItems")
     private val collection: MongoCollection<MongoShoppingListItemDocument>,
 ) : ShoppingListItemRepository,
     CrudRepository<ShoppingListItem> by MappedCrudRepository(
