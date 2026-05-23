@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.koin.compiler)
+    alias(libs.plugins.mokkery)
     application
 }
 
@@ -30,4 +31,5 @@ dependencies {
     implementation(libs.ktor.server.cio)
 
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.coroutines.test)
 }

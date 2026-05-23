@@ -1,4 +1,4 @@
-package com.felix.livinglink.user.infrastructure
+package com.felix.livinglink.user.infrastructure.system
 
 import com.felix.livinglink.core.delivery.mcp.server.McpApiKeySettings
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
