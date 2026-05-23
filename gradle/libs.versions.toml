@@ -10,6 +10,7 @@ ktor = "3.3.3"
 mokkery = "3.3.0"
 coroutinesTest = "1.11.0"
 konsist = "0.17.3"
+testcontainers = "2.0.5"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -21,6 +22,8 @@ mongodb-driver-kotlin-coroutine = { module = "org.mongodb:mongodb-driver-kotlin-
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
+testcontainers-junit-jupiter = { group = "org.testcontainers", name = "testcontainers-junit-jupiter", version.ref = "testcontainers" }
+testcontainers-mongodb = { group = "org.testcontainers", name = "testcontainers-mongodb", version.ref = "testcontainers" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

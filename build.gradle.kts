@@ -33,8 +33,13 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.konsist)
+    testImplementation(libs.testcontainers.mongodb)
+    testImplementation(libs.testcontainers.junit.jupiter)
 }
 
 tasks.test {
     useJUnitPlatform()
+
+    environment("LIVINGLINK_MONGO_CONNECTION_STRING", "mongodb://localhost:27017")
+    environment("LIVINGLINK_MONGO_DATABASE", "dummy")
 }
