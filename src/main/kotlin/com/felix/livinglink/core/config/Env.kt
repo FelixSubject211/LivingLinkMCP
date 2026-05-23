@@ -1,4 +1,4 @@
-package com.felix.livinglink.core.infrastructure.system
+package com.felix.livinglink.core.config
 
 object Env {
     fun required(name: String): String =

@@ -1,6 +1,5 @@
-package com.felix.livinglink.core.infrastructure.mongo
+package com.felix.livinglink.core.config
 
-import com.felix.livinglink.core.infrastructure.system.Env
 import org.koin.core.annotation.Single
 
 @Single

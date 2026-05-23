@@ -1,10 +1,10 @@
-package com.felix.livinglink.user.infrastructure.system
+package com.felix.livinglink.user.delivery.mcp
 
-import com.felix.livinglink.core.delivery.mcp.server.McpApiKeySettings
-import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
-import com.felix.livinglink.core.delivery.mcp.server.McpStdioUserSettings
-import com.felix.livinglink.core.delivery.mcp.server.McpTransport
-import com.felix.livinglink.core.delivery.mcp.server.McpTransportSettings
+import com.felix.livinglink.core.config.McpApiKeySettings
+import com.felix.livinglink.core.config.McpRequestUser
+import com.felix.livinglink.core.config.McpStdioUserSettings
+import com.felix.livinglink.core.config.McpTransport
+import com.felix.livinglink.core.config.McpTransportSettings
 import com.felix.livinglink.user.domain.User
 import com.felix.livinglink.user.domain.UserLookup
 import org.koin.core.annotation.Single

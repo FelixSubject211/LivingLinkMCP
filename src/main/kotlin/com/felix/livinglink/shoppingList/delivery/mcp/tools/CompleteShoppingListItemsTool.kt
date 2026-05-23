@@ -1,8 +1,8 @@
 package com.felix.livinglink.shoppingList.delivery.mcp.tools
 
+import com.felix.livinglink.core.config.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
-import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.shoppingList.application.CompleteShoppingListItemsUseCase
 import com.felix.livinglink.shoppingList.delivery.mcp.dto.toMcpReferenceDto

@@ -1,5 +1,6 @@
 package com.felix.livinglink.core.infrastructure.mongo
 
+import com.felix.livinglink.core.config.MongoSettings
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient

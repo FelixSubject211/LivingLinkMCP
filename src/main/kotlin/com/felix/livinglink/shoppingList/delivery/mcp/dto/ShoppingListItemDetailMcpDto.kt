@@ -1,7 +1,7 @@
 package com.felix.livinglink.shoppingList.delivery.mcp.dto
 
+import com.felix.livinglink.core.config.TimezoneSettings
 import com.felix.livinglink.core.delivery.mcp.dsl.toMcpString
-import com.felix.livinglink.core.infrastructure.system.TimezoneSettings
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.user.delivery.mcp.ResolvedUsers
 import com.felix.livinglink.user.delivery.mcp.UserReferenceMcpDto

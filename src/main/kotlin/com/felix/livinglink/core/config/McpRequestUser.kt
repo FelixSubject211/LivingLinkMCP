@@ -1,4 +1,4 @@
-package com.felix.livinglink.core.delivery.mcp.server
+package com.felix.livinglink.core.config
 
 data class McpRequestUser(
     val id: String,

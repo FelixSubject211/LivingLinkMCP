@@ -32,4 +32,9 @@ dependencies {
 
     testImplementation(libs.kotlin.test)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.konsist)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
