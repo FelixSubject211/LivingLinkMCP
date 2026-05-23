@@ -10,7 +10,7 @@ private val mcpJson: Json =
     Json {
         prettyPrint = false
         encodeDefaults = true
-        explicitNulls = false
+        explicitNulls = true
     }
 
 fun <T> success(
