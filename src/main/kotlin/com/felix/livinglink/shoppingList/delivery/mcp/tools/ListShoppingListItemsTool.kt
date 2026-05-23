@@ -2,16 +2,19 @@ package com.felix.livinglink.shoppingList.delivery.mcp.tools
 
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
-import com.felix.livinglink.core.delivery.mcp.dsl.toMcpString
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.core.infrastructure.system.TimezoneSettings
 import com.felix.livinglink.shoppingList.application.ListShoppingListItemsUseCase
+import com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemDetailMcpDto
 import com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemSortMcpDto
+import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemQuery
+import com.felix.livinglink.user.delivery.mcp.ResolvedUsers
 import com.felix.livinglink.user.delivery.mcp.resolveUsers
 import com.felix.livinglink.user.domain.UserLookup
 import io.modelcontextprotocol.kotlin.sdk.server.Server
+import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
 
 @Single(binds = [McpToolRegistrar::class])
@@ -63,31 +66,43 @@ class ListShoppingListItemsTool(
                         ),
                     )
 
-                success {
-                    val users =
-                        resolveUsers(
-                            userLookup = userLookup,
-                            ids = output.items.flatMap { item -> item.referencedUserIds },
-                        )
+                val resolvedUsers =
+                    resolveUsers(
+                        userLookup = userLookup,
+                        ids = output.items.flatMap { item -> item.referencedUserIds },
+                    )
 
-                    ifEmpty(output.items, "No shopping list items found.") {
-                        output.items.forEach { item ->
-                            val lastEvent = item.completionEvents.lastOrNull()
-                            val status =
-                                if (item.isCompleted && lastEvent != null) {
-                                    "done by ${users.nameOf(lastEvent.byUserId)} at ${lastEvent.at.toMcpString(timezoneSettings)}"
-                                } else {
-                                    "open"
-                                }
-
-                            line(
-                                "- [$status] ${item.name} " +
-                                    "(id: ${item.id}, createdBy: ${users.nameOf(item.createdByUserId)}, createdAt: ${item.createdAt.toMcpString(timezoneSettings)})",
-                            )
-                        }
-                    }
-                }
+                success(
+                    Output.fromDomain(
+                        items = output.items,
+                        resolvedUsers = resolvedUsers,
+                        timezoneSettings = timezoneSettings,
+                    ),
+                )
             }
+        }
+    }
+
+    @Serializable
+    private data class Output(
+        val items: List<ShoppingListItemDetailMcpDto>,
+    ) {
+        companion object {
+            fun fromDomain(
+                items: List<ShoppingListItem>,
+                resolvedUsers: ResolvedUsers,
+                timezoneSettings: TimezoneSettings,
+            ): Output =
+                Output(
+                    items =
+                        items.map { item ->
+                            ShoppingListItemDetailMcpDto.fromDomain(
+                                item = item,
+                                resolvedUsers = resolvedUsers,
+                                timezoneSettings = timezoneSettings,
+                            )
+                        },
+                )
         }
     }
 }

@@ -5,7 +5,10 @@ import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.shoppingList.application.CompleteShoppingListItemsUseCase
+import com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemReferenceMcpDto
+import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import io.modelcontextprotocol.kotlin.sdk.server.Server
+import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
 
 @Single(binds = [McpToolRegistrar::class])
@@ -35,18 +38,40 @@ class CompleteShoppingListItemsTool(
                         ),
                     )
 
-                success {
-                    output.completedItems.forEach { item ->
-                        line("- Completed '${item.name}'.")
-                    }
-                    output.alreadyCompletedItems.forEach { item ->
-                        line("- '${item.name}' was already completed.")
-                    }
-                    output.missingIds.forEach { id ->
-                        line("- Item with id '$id' was not found.")
-                    }
-                }
+                success(
+                    Output.fromDomain(
+                        completedItems = output.completedItems,
+                        alreadyCompletedItems = output.alreadyCompletedItems,
+                        missingIds = output.missingIds,
+                    ),
+                )
             }
+        }
+    }
+
+    @Serializable
+    private data class Output(
+        val completedItems: List<ShoppingListItemReferenceMcpDto>,
+        val alreadyCompletedItems: List<ShoppingListItemReferenceMcpDto>,
+        val missingIds: List<String>,
+    ) {
+        companion object {
+            fun fromDomain(
+                completedItems: List<ShoppingListItem>,
+                alreadyCompletedItems: List<ShoppingListItem>,
+                missingIds: List<String>,
+            ): Output =
+                Output(
+                    completedItems =
+                        completedItems.map { item ->
+                            ShoppingListItemReferenceMcpDto.fromDomain(item)
+                        },
+                    alreadyCompletedItems =
+                        alreadyCompletedItems.map { item ->
+                            ShoppingListItemReferenceMcpDto.fromDomain(item)
+                        },
+                    missingIds = missingIds,
+                )
         }
     }
 }
