@@ -15,7 +15,6 @@ import com.felix.livinglink.user.domain.UserLookup
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
-import kotlin.time.Instant
 
 @Single(binds = [McpToolRegistrar::class])
 class ListCalendarEventsTool(
@@ -32,13 +31,13 @@ class ListCalendarEventsTool(
             description = "Lists calendar events that intersect a time range. Recurring events are expanded into individual occurrences.",
         ) {
             val from =
-                required<String>(
+                requiredInstant(
                     name = "from",
                     description = "Start of the time range as ISO 8601 instant.",
                 )
 
             val to =
-                required<String>(
+                requiredInstant(
                     name = "to",
                     description = "End of the time range as ISO 8601 instant.",
                 )
@@ -68,8 +67,8 @@ class ListCalendarEventsTool(
                         ListCalendarEventsUseCase.Input(
                             query =
                                 CalendarEventQuery(
-                                    from = parseRangeInstant("from", from()),
-                                    to = parseRangeInstant("to", to()),
+                                    from = from(),
+                                    to = to(),
                                     participantUserIds = participantUserIds()?.toSet(),
                                     createdByUserIds = createdByUserIds()?.toSet(),
                                 ),
@@ -97,15 +96,6 @@ class ListCalendarEventsTool(
             }
         }
     }
-
-    // TODO add to DSL
-    private fun parseRangeInstant(name: String, value: String): Instant =
-        runCatching { Instant.parse(value) }
-            .getOrElse {
-                throw IllegalArgumentException(
-                    "'$name' must be a valid ISO 8601 instant, was '$value'.",
-                )
-            }
 
     @Serializable
     private data class Output(

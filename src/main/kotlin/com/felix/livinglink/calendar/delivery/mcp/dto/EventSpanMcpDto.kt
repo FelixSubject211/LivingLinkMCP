@@ -1,10 +1,10 @@
 package com.felix.livinglink.calendar.delivery.mcp.dto
 
 import com.felix.livinglink.calendar.domain.EventSpan
+import com.felix.livinglink.core.delivery.mcp.dsl.parseInstant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
-import kotlin.time.Instant
 
 @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
 @Serializable
@@ -54,11 +54,3 @@ sealed interface EventSpanMcpDto {
             }
     }
 }
-
-internal fun parseInstant(name: String, value: String): Instant =
-    runCatching { Instant.parse(value) }
-        .getOrElse {
-            throw IllegalArgumentException(
-                "'$name' must be a valid ISO 8601 instant, was '$value'.",
-            )
-        }

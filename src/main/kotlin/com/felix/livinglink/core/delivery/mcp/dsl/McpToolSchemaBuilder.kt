@@ -42,6 +42,16 @@ object McpToolSchemaBuilder {
     inline fun <reified T> schemaFor(): JsonElement =
         schemaFor(serializer<T>().descriptor)
 
+    fun instantSchema(): JsonElement =
+        buildJsonObject {
+            put("type", "string")
+            put(
+                "description",
+                "ISO 8601 date or instant. Accepted: '2026-05-24', " +
+                    "'2026-05-24T10:00:00+02:00', '2026-05-24T10:00:00Z'.",
+            )
+        }
+
     fun intSchema(
         minimum: Int? = null,
         maximum: Int? = null,

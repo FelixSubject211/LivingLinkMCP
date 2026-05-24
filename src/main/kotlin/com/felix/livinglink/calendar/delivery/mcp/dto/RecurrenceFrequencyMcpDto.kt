@@ -1,6 +1,7 @@
 package com.felix.livinglink.calendar.delivery.mcp.dto
 
 import com.felix.livinglink.calendar.domain.RecurrenceRule
+import com.felix.livinglink.core.delivery.mcp.dsl.parseInstant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator

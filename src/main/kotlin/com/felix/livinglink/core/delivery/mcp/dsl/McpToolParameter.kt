@@ -8,7 +8,7 @@ sealed class McpToolParameter<T>(
     val name: String,
     val description: String,
     val required: Boolean,
-    val serializer: KSerializer<T>,
+    val serializer: KSerializer<*>,
     val schema: JsonElement,
 ) {
     abstract fun validate(value: Any?)
@@ -71,6 +71,28 @@ sealed class McpToolParameter<T>(
         @Suppress("UNCHECKED_CAST")
         override fun validate(value: Any?) {
             validator(value as T)
+        }
+    }
+
+    class Mapped<TRaw : Any, T>(
+        name: String,
+        description: String,
+        rawSerializer: KSerializer<TRaw>,
+        schema: JsonElement,
+        required: Boolean,
+        val rawDefault: TRaw?,
+        val map: (TRaw) -> T,
+        private val validator: (TRaw) -> Unit = {},
+    ) : McpToolParameter<T>(
+            name = name,
+            description = description,
+            required = required,
+            serializer = if (required) rawSerializer else rawSerializer.nullable,
+            schema = schema,
+        ) {
+        @Suppress("UNCHECKED_CAST")
+        override fun validate(value: Any?) {
+            value?.let { validator(it as TRaw) }
         }
     }
 }

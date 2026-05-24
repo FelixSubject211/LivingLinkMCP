@@ -1,7 +1,9 @@
 package com.felix.livinglink.core.delivery.mcp.dsl
 
+import com.felix.livinglink.core.delivery.mcp.dsl.McpToolSchemaBuilder.instantSchema
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import kotlinx.serialization.serializer
+import kotlin.time.Instant
 
 class McpToolBuilder {
     private val mutableParameters: MutableList<McpToolParameter<*>> = mutableListOf()
@@ -56,6 +58,38 @@ class McpToolBuilder {
                 serializer = serializer<T>(),
                 schema = McpToolSchemaBuilder.schemaFor<T>(),
                 default = default,
+            ),
+        )
+
+    fun requiredInstant(
+        name: String,
+        description: String,
+    ): McpToolParameter<Instant> =
+        parameter(
+            McpToolParameter.Mapped(
+                name = name,
+                description = description,
+                rawSerializer = serializer<String>(),
+                schema = instantSchema(),
+                required = true,
+                rawDefault = null,
+                map = { raw -> parseInstant(name, raw) },
+            ),
+        )
+
+    fun optionalInstant(
+        name: String,
+        description: String,
+    ): McpToolParameter<Instant?> =
+        parameter(
+            McpToolParameter.Mapped(
+                name = name,
+                description = description,
+                rawSerializer = serializer<String>(),
+                schema = instantSchema(),
+                required = false,
+                rawDefault = null,
+                map = { raw -> parseInstant(name, raw) },
             ),
         )
 
