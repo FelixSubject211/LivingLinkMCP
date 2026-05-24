@@ -10,6 +10,7 @@ import com.felix.livinglink.core.config.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.user.delivery.mcp.KnownUsersDescriptionProvider
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
@@ -17,6 +18,7 @@ import org.koin.core.annotation.Single
 @Single(binds = [McpToolRegistrar::class])
 class AddCalendarEventTool(
     private val addCalendarEventUseCase: AddCalendarEventUseCase,
+    private val knownUsersDescriptionProvider: KnownUsersDescriptionProvider,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -53,7 +55,10 @@ class AddCalendarEventTool(
             val participantUserIds =
                 optional<List<String>>(
                     name = "participantUserIds",
-                    description = "List of participant user IDs. Use IDs from the 'Known users' list in the server instructions.",
+                    description =
+                        knownUsersDescriptionProvider.describeWith(
+                            "List of participant user IDs.",
+                        ),
                 )
 
             val category =

@@ -10,6 +10,7 @@ import com.felix.livinglink.core.config.TimezoneSettings
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.user.delivery.mcp.KnownUsersDescriptionProvider
 import com.felix.livinglink.user.delivery.mcp.resolveUsers
 import com.felix.livinglink.user.domain.UserLookup
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -21,6 +22,7 @@ class ListCalendarEventsTool(
     private val listCalendarEventsUseCase: ListCalendarEventsUseCase,
     private val userLookup: UserLookup,
     private val timezoneSettings: TimezoneSettings,
+    private val knownUsersDescriptionProvider: KnownUsersDescriptionProvider,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -45,13 +47,19 @@ class ListCalendarEventsTool(
             val participantUserIds =
                 optional<List<String>>(
                     name = "participantUserIds",
-                    description = "Filter: only events with at least one of these participants. Use IDs from the 'Known users' list in the server instructions.",
+                    description =
+                        knownUsersDescriptionProvider.describeWith(
+                            "Filter: only events with at least one of these participants.",
+                        ),
                 )
 
             val createdByUserIds =
                 optional<List<String>>(
                     name = "createdByUserIds",
-                    description = "Filter: only events created by one of these users. Use IDs from the 'Known users' list in the server instructions.",
+                    description =
+                        knownUsersDescriptionProvider.describeWith(
+                            "Filter: only events created by one of these users.",
+                        ),
                 )
 
             val sort =
