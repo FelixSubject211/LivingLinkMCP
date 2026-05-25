@@ -8,7 +8,8 @@ import com.felix.livinglink.core.domain.MappedCrudRepository
 import com.felix.livinglink.core.infrastructure.mongo.MongoCrudRepository
 import com.mongodb.client.model.Filters
 import com.mongodb.kotlin.client.coroutine.MongoCollection
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.bson.conversions.Bson
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -28,7 +29,7 @@ class MongoCalendarEventRepository(
         toStorage = MongoCalendarEventDocument::fromDomain,
         toDomain = MongoCalendarEventDocument::toDomain,
     ) {
-    override suspend fun find(query: CalendarEventQuery): List<CalendarEvent> {
+    override suspend fun find(query: CalendarEventQuery): Flow<CalendarEvent> {
         val filters =
             buildList<Bson> {
                 add(
@@ -49,7 +50,6 @@ class MongoCalendarEventRepository(
 
         return collection
             .find(Filters.and(filters))
-            .toList()
             .map { it.toDomain() }
     }
 }

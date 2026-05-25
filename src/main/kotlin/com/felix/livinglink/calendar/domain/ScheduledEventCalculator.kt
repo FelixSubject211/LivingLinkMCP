@@ -9,5 +9,5 @@ interface ScheduledEventCalculator {
         from: Instant,
         to: Instant,
         timeZone: TimeZone,
-    ): List<ScheduledEvent>
+    ): Sequence<ScheduledEvent>
 }

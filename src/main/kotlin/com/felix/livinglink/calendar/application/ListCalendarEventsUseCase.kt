@@ -6,6 +6,11 @@ import com.felix.livinglink.calendar.domain.CalendarEventSort
 import com.felix.livinglink.calendar.domain.EventSpan
 import com.felix.livinglink.calendar.domain.ScheduledEvent
 import com.felix.livinglink.calendar.domain.ScheduledEventCalculator
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import org.koin.core.annotation.Single
@@ -16,21 +21,29 @@ class ListCalendarEventsUseCase(
     private val calendarEventRepository: CalendarEventRepository,
     private val scheduledEventCalculator: ScheduledEventCalculator,
 ) {
+    @OptIn(ExperimentalCoroutinesApi::class)
     suspend operator fun invoke(input: Input): Output {
-        val events = calendarEventRepository.find(input.query)
+        val capped =
+            calendarEventRepository
+                .find(input.query)
+                .flatMapConcat { event ->
+                    scheduledEventCalculator
+                        .calculate(
+                            event = event,
+                            from = input.query.from,
+                            to = input.query.to,
+                            timeZone = input.timeZone,
+                        ).asFlow()
+                }.take(MAX_RESULTS + 1)
+                .toList()
 
-        val scheduled =
-            events
-                .flatMap { event ->
-                    scheduledEventCalculator.calculate(
-                        event = event,
-                        from = input.query.from,
-                        to = input.query.to,
-                        timeZone = input.timeZone,
-                    )
-                }.sortedWith(comparatorFor(input.sort, input.timeZone))
+        require(capped.size <= MAX_RESULTS) {
+            "Calendar query produced more than $MAX_RESULTS scheduled events. Narrow the time range or filters."
+        }
 
-        return Output(scheduledEvents = scheduled)
+        val sorted = capped.sortedWith(comparatorFor(input.sort, input.timeZone))
+
+        return Output(scheduledEvents = sorted)
     }
 
     private fun comparatorFor(
@@ -66,4 +79,8 @@ class ListCalendarEventsUseCase(
     data class Output(
         val scheduledEvents: List<ScheduledEvent>,
     )
+
+    companion object {
+        private const val MAX_RESULTS = 10_000
+    }
 }

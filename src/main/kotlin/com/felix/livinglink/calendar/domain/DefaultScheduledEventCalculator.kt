@@ -17,7 +17,7 @@ class DefaultScheduledEventCalculator : ScheduledEventCalculator {
         from: Instant,
         to: Instant,
         timeZone: TimeZone,
-    ): List<ScheduledEvent> {
+    ): Sequence<ScheduledEvent> {
         require(to >= from) { "to must be >= from" }
 
         return when (event.recurrence) {
@@ -31,11 +31,11 @@ class DefaultScheduledEventCalculator : ScheduledEventCalculator {
         from: Instant,
         to: Instant,
         timeZone: TimeZone,
-    ): List<ScheduledEvent> {
+    ): Sequence<ScheduledEvent> {
         if (!event.span.intersects(from, to, timeZone)) {
-            return emptyList()
+            return emptySequence()
         }
-        return listOf(event.toScheduled(event.span))
+        return sequenceOf(event.toScheduled(event.span))
     }
 
     private fun calculateRecurring(
@@ -44,7 +44,7 @@ class DefaultScheduledEventCalculator : ScheduledEventCalculator {
         from: Instant,
         to: Instant,
         timeZone: TimeZone,
-    ): List<ScheduledEvent> {
+    ): Sequence<ScheduledEvent> {
         val baseSpan = event.span
 
         return generateSequence(0) { it + 1 }
@@ -54,7 +54,6 @@ class DefaultScheduledEventCalculator : ScheduledEventCalculator {
                 !span.startsAfter(to, timeZone) && !span.startsAfter(recurrence.end, timeZone)
             }.filter { span -> span.intersects(from, to, timeZone) }
             .map { span -> event.toScheduled(span) }
-            .toList()
     }
 
     private fun RecurrenceRule.hasOccurrence(index: Int): Boolean =
