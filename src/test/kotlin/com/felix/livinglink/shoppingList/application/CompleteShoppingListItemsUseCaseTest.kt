@@ -11,10 +11,7 @@ import com.felix.livinglink.shoppingList.domain.completionEvent
 import com.felix.livinglink.shoppingList.domain.shoppingListItem
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.mokkery.verify.VerifyMode.Companion.exactly
-import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -62,7 +59,7 @@ class CompleteShoppingListItemsUseCaseTest {
                 useCase(
                     CompleteShoppingListItemsUseCase.Input(
                         byUserId = "user-1",
-                        ids = listOf("id-1"),
+                        ids = setOf("id-1"),
                     ),
                 )
 
@@ -90,7 +87,7 @@ class CompleteShoppingListItemsUseCaseTest {
                 useCase(
                     CompleteShoppingListItemsUseCase.Input(
                         byUserId = "user-1",
-                        ids = listOf("id-1"),
+                        ids = setOf("id-1"),
                     ),
                 )
 
@@ -117,7 +114,7 @@ class CompleteShoppingListItemsUseCaseTest {
                 useCase(
                     CompleteShoppingListItemsUseCase.Input(
                         byUserId = "user-1",
-                        ids = listOf("id-1"),
+                        ids = setOf("id-1"),
                     ),
                 )
 
@@ -144,7 +141,7 @@ class CompleteShoppingListItemsUseCaseTest {
                 useCase(
                     CompleteShoppingListItemsUseCase.Input(
                         byUserId = "user-1",
-                        ids = listOf("id-1"),
+                        ids = setOf("id-1"),
                     ),
                 )
 
@@ -158,29 +155,5 @@ class CompleteShoppingListItemsUseCaseTest {
                 ),
                 result,
             )
-        }
-
-    @Test
-    fun `duplicate ids are deduplicated before calling the repository`() =
-        runTest {
-            // given
-            every { timeProvider() } returns now
-            repository.stubUpdates(id = "id-1", currentItem = openItem)
-
-            // when
-            useCase(
-                CompleteShoppingListItemsUseCase.Input(
-                    byUserId = "user-1",
-                    ids = listOf("id-1", "id-1", "id-1"),
-                ),
-            )
-
-            // then
-            verifySuspend(exactly(1)) {
-                repository.updateWithOptimisticLocking<ShoppingListItem>(
-                    id = "id-1",
-                    modify = any(),
-                )
-            }
         }
 }

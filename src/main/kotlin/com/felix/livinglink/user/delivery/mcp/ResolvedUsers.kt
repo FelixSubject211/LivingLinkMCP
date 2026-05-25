@@ -17,6 +17,6 @@ suspend fun resolveUsers(
     ResolvedUsers(
         usersById =
             userLookup.findByIds(
-                ids.toSet().toList(),
+                ids.toSet(),
             ),
     )

@@ -14,7 +14,7 @@ class CompleteShoppingListItemsUseCase(
 ) {
     suspend operator fun invoke(input: Input): Output {
         val results =
-            input.ids.distinct().map { id ->
+            input.ids.map { id ->
                 val result =
                     shoppingListItemRepository.updateWithOptimisticLocking(id) { current ->
                         if (current.isCompleted) {
@@ -65,7 +65,7 @@ class CompleteShoppingListItemsUseCase(
 
     data class Input(
         val byUserId: String,
-        val ids: List<String>,
+        val ids: Set<String>,
     )
 
     data class Output(

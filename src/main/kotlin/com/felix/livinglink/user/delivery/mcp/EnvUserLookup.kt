@@ -15,13 +15,11 @@ class EnvUserLookup(
     private val apiKeySettings: McpApiKeySettings,
     private val stdioUserSettings: McpStdioUserSettings,
 ) : UserLookup {
-    override suspend fun findByIds(ids: List<String>): Map<String, User> {
-        val distinctIds = ids.toSet()
-
-        return when (transportSettings.transport) {
+    override suspend fun findByIds(ids: Set<String>): Map<String, User> =
+        when (transportSettings.transport) {
             McpTransport.Stdio -> {
                 val user = stdioUserSettings.user
-                if (user.id in distinctIds) {
+                if (user.id in ids) {
                     mapOf(user.id to user.toDomain())
                 } else {
                     emptyMap()
@@ -30,12 +28,11 @@ class EnvUserLookup(
 
             McpTransport.Http ->
                 apiKeySettings
-                    .usersByIds(distinctIds.toList())
+                    .usersByIds(ids)
                     .mapValues { (_, user) ->
                         user.toDomain()
                     }
         }
-    }
 
     private fun McpRequestUser.toDomain(): User =
         User(

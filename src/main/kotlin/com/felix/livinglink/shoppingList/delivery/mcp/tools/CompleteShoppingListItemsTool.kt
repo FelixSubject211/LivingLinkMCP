@@ -23,7 +23,7 @@ class CompleteShoppingListItemsTool(
             description = "Marks one or more shopping list items as completed.",
         ) {
             val ids =
-                required<List<String>>(
+                required<Set<String>>(
                     name = "ids",
                     description = "IDs of the items.",
                 )

@@ -49,9 +49,8 @@ class McpApiKeySettings {
     fun userForApiKey(apiKey: String): McpRequestUser? =
         usersByApiKey[apiKey]
 
-    fun usersByIds(ids: List<String>): Map<String, McpRequestUser> =
+    fun usersByIds(ids: Set<String>): Map<String, McpRequestUser> =
         ids
-            .distinct()
             .mapNotNull { id ->
                 usersById[id]?.let { user ->
                     id to user
