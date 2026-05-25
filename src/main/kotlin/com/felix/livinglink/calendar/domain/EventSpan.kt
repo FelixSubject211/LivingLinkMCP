@@ -1,5 +1,6 @@
 package com.felix.livinglink.calendar.domain
 
+import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
 sealed interface EventSpan {
@@ -13,11 +14,11 @@ sealed interface EventSpan {
     }
 
     data class AllDay(
-        val start: Instant,
-        val end: Instant,
+        val startDate: LocalDate,
+        val endDate: LocalDate,
     ) : EventSpan {
         init {
-            require(end >= start) { "AllDay.end must be >= start" }
+            require(endDate >= startDate) { "AllDay.endDate must be >= startDate" }
         }
     }
 }

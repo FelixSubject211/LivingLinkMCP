@@ -5,6 +5,11 @@ import com.felix.livinglink.calendar.domain.EventCategory
 import com.felix.livinglink.calendar.domain.EventSpan
 import com.felix.livinglink.calendar.domain.RecurrenceRule
 import com.felix.livinglink.core.infrastructure.mongo.MongoVersionedDocument
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.codecs.pojo.annotations.BsonProperty
 import kotlin.time.Instant
@@ -61,14 +66,28 @@ data class MongoCalendarEventDocument(
         @param:BsonProperty(Fields.Span.TYPE)
         val type: String,
         @param:BsonProperty(Fields.Span.START)
-        val start: Instant,
+        val start: Instant?,
         @param:BsonProperty(Fields.Span.END)
-        val end: Instant,
+        val end: Instant?,
+        @param:BsonProperty(Fields.Span.START_DATE)
+        val startDate: String?,
+        @param:BsonProperty(Fields.Span.END_DATE)
+        val endDate: String?,
     ) {
         fun toDomain(): EventSpan =
             when (type) {
-                TYPE_TIMED -> EventSpan.Timed(start = start, end = end)
-                TYPE_ALL_DAY -> EventSpan.AllDay(start = start, end = end)
+                TYPE_TIMED ->
+                    EventSpan.Timed(
+                        start = requireNotNull(start) { "Span.start missing for Timed" },
+                        end = requireNotNull(end) { "Span.end missing for Timed" },
+                    )
+
+                TYPE_ALL_DAY ->
+                    EventSpan.AllDay(
+                        startDate = LocalDate.parse(requireNotNull(startDate) { "Span.startDate missing for AllDay" }),
+                        endDate = LocalDate.parse(requireNotNull(endDate) { "Span.endDate missing for AllDay" }),
+                    )
+
                 else -> error("Unknown Span.type: $type")
             }
 
@@ -78,8 +97,23 @@ data class MongoCalendarEventDocument(
 
             fun fromDomain(span: EventSpan): Span =
                 when (span) {
-                    is EventSpan.Timed -> Span(type = TYPE_TIMED, start = span.start, end = span.end)
-                    is EventSpan.AllDay -> Span(type = TYPE_ALL_DAY, start = span.start, end = span.end)
+                    is EventSpan.Timed ->
+                        Span(
+                            type = TYPE_TIMED,
+                            start = span.start,
+                            end = span.end,
+                            startDate = null,
+                            endDate = null,
+                        )
+
+                    is EventSpan.AllDay ->
+                        Span(
+                            type = TYPE_ALL_DAY,
+                            start = null,
+                            end = null,
+                            startDate = span.startDate.toString(),
+                            endDate = span.endDate.toString(),
+                        )
                 }
         }
     }
@@ -257,19 +291,25 @@ data class MongoCalendarEventDocument(
                 recurrence = recurrence,
                 participants = event.participants.map { Participant.fromDomain(it) },
                 category = Category.fromDomain(event.category),
-                effectiveFrom = span.start,
-                effectiveTo = effectiveTo(span = span, recurrence = recurrence),
+                effectiveFrom = effectiveFrom(event.span),
+                effectiveTo = effectiveTo(event.span, recurrence),
                 createdAt = event.createdAt,
                 updatedAt = event.updatedAt,
                 version = event.version,
             )
         }
 
+        private fun effectiveFrom(span: EventSpan): Instant =
+            when (span) {
+                is EventSpan.Timed -> span.start
+                is EventSpan.AllDay -> span.startDate.atStartOfDayIn(TimeZone.UTC)
+            }
+
         private fun effectiveTo(
-            span: Span,
+            span: EventSpan,
             recurrence: Recurrence?,
         ): Instant {
-            val end = recurrence?.end ?: return span.end
+            val end = recurrence?.end ?: return baseEffectiveTo(span)
             return when (end.type) {
                 Recurrence.End.TYPE_NEVER -> Instant.DISTANT_FUTURE
                 Recurrence.End.TYPE_UNTIL -> requireNotNull(end.at) { "End.at missing for Until" }
@@ -277,5 +317,12 @@ data class MongoCalendarEventDocument(
                 else -> error("Unknown Recurrence.End.type: ${end.type}")
             }
         }
+
+        private fun baseEffectiveTo(span: EventSpan): Instant =
+            when (span) {
+                is EventSpan.Timed -> span.end
+                is EventSpan.AllDay ->
+                    span.endDate.plus(1, DateTimeUnit.DAY).atStartOfDayIn(TimeZone.UTC)
+            }
     }
 }

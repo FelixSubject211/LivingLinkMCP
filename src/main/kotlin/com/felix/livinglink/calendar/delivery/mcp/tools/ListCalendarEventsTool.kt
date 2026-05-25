@@ -81,6 +81,7 @@ class ListCalendarEventsTool(
                                     createdByUserIds = createdByUserIds()?.toSet(),
                                 ),
                             sort = sort().toDomain(),
+                            timeZone = timezoneSettings.timeZone,
                         ),
                     )
 

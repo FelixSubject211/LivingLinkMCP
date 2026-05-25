@@ -2,11 +2,13 @@ package com.felix.livinglink.calendar.domain
 
 import com.felix.livinglink.calendar.domain.RecurrenceRule.Frequency
 import com.felix.livinglink.calendar.domain.RecurrenceRule.RecurrenceEnd
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
 import org.koin.core.annotation.Single
-import java.time.ZoneOffset
 import kotlin.time.Instant
-import kotlin.time.toJavaInstant
-import kotlin.time.toKotlinInstant
 
 @Single(binds = [ScheduledEventCalculator::class])
 class DefaultScheduledEventCalculator : ScheduledEventCalculator {
@@ -14,12 +16,13 @@ class DefaultScheduledEventCalculator : ScheduledEventCalculator {
         event: CalendarEvent,
         from: Instant,
         to: Instant,
+        timeZone: TimeZone,
     ): List<ScheduledEvent> {
         require(to >= from) { "to must be >= from" }
 
         return when (event.recurrence) {
-            null -> calculateSingle(event, from, to)
-            else -> calculateRecurring(event, event.recurrence, from, to)
+            null -> calculateSingle(event, from, to, timeZone)
+            else -> calculateRecurring(event, event.recurrence, from, to, timeZone)
         }
     }
 
@@ -27,12 +30,12 @@ class DefaultScheduledEventCalculator : ScheduledEventCalculator {
         event: CalendarEvent,
         from: Instant,
         to: Instant,
+        timeZone: TimeZone,
     ): List<ScheduledEvent> {
-        val span = event.span
-        if (!span.intersects(from, to)) {
+        if (!event.span.intersects(from, to, timeZone)) {
             return emptyList()
         }
-        return listOf(event.toScheduled(span))
+        return listOf(event.toScheduled(event.span))
     }
 
     private fun calculateRecurring(
@@ -40,15 +43,16 @@ class DefaultScheduledEventCalculator : ScheduledEventCalculator {
         recurrence: RecurrenceRule,
         from: Instant,
         to: Instant,
+        timeZone: TimeZone,
     ): List<ScheduledEvent> {
         val baseSpan = event.span
-        val baseDurationMillis = baseSpan.end.toEpochMilliseconds() - baseSpan.start.toEpochMilliseconds()
 
         return generateSequence(0) { it + 1 }
             .takeWhile { index -> recurrence.hasOccurrence(index) }
-            .map { index -> baseSpan.shiftedBy(recurrence, index, baseDurationMillis) }
-            .takeWhile { span -> !span.startsAfter(to) && !span.startsAfter(recurrence.end) }
-            .filter { span -> span.intersects(from, to) }
+            .map { index -> baseSpan.shiftedBy(recurrence, index, timeZone) }
+            .takeWhile { span ->
+                !span.startsAfter(to, timeZone) && !span.startsAfter(recurrence.end, timeZone)
+            }.filter { span -> span.intersects(from, to, timeZone) }
             .map { span -> event.toScheduled(span) }
             .toList()
     }
@@ -62,53 +66,82 @@ class DefaultScheduledEventCalculator : ScheduledEventCalculator {
     private fun EventSpan.shiftedBy(
         recurrence: RecurrenceRule,
         index: Int,
-        durationMillis: Long,
+        timeZone: TimeZone,
     ): EventSpan {
-        val newStart = start.plus(recurrence.frequency, recurrence.interval * index)
-        val newEnd = Instant.fromEpochMilliseconds(newStart.toEpochMilliseconds() + durationMillis)
-        return withRange(newStart, newEnd)
+        if (index == 0) return this
+        val steps = recurrence.interval * index
+
+        return when (this) {
+            is EventSpan.Timed ->
+                EventSpan.Timed(
+                    start = start.shifted(recurrence.frequency, steps, timeZone),
+                    end = end.shifted(recurrence.frequency, steps, timeZone),
+                )
+
+            is EventSpan.AllDay ->
+                EventSpan.AllDay(
+                    startDate = startDate.shifted(recurrence.frequency, steps),
+                    endDate = endDate.shifted(recurrence.frequency, steps),
+                )
+        }
     }
 
-    private fun EventSpan.intersects(from: Instant, to: Instant): Boolean =
-        end >= from && start <= to
-
-    private fun EventSpan.startsAfter(instant: Instant): Boolean =
-        start > instant
-
-    private fun EventSpan.startsAfter(end: RecurrenceEnd): Boolean =
-        end is RecurrenceEnd.Until && startsAfter(end.at)
-
-    private fun Instant.plus(frequency: Frequency, steps: Int): Instant {
-        if (steps == 0) return this
-        val zoned = toJavaInstant().atOffset(ZoneOffset.UTC)
-        val shifted =
-            when (frequency) {
-                Frequency.Daily -> zoned.plusDays(steps.toLong())
-                Frequency.Weekly -> zoned.plusWeeks(steps.toLong())
-                Frequency.Monthly -> zoned.plusMonths(steps.toLong())
-                Frequency.Yearly -> zoned.plusYears(steps.toLong())
-            }
-        return shifted.toInstant().toKotlinInstant()
+    private fun EventSpan.intersects(
+        from: Instant,
+        to: Instant,
+        timeZone: TimeZone,
+    ): Boolean {
+        val spanStart = startInstant(timeZone)
+        val spanEnd = endInstant(timeZone)
+        return spanEnd >= from && spanStart <= to
     }
 
-    private val EventSpan.start: Instant
-        get() =
-            when (this) {
-                is EventSpan.Timed -> start
-                is EventSpan.AllDay -> start
-            }
+    private fun EventSpan.startsAfter(
+        instant: Instant,
+        timeZone: TimeZone,
+    ): Boolean = startInstant(timeZone) > instant
 
-    private val EventSpan.end: Instant
-        get() =
-            when (this) {
-                is EventSpan.Timed -> end
-                is EventSpan.AllDay -> end
-            }
+    private fun EventSpan.startsAfter(
+        end: RecurrenceEnd,
+        timeZone: TimeZone,
+    ): Boolean {
+        if (end !is RecurrenceEnd.Until) return false
+        return when (this) {
+            is EventSpan.Timed -> start > end.at
+            is EventSpan.AllDay -> endInstant(timeZone) > end.at
+        }
+    }
 
-    private fun EventSpan.withRange(start: Instant, end: Instant): EventSpan =
+    private fun EventSpan.startInstant(timeZone: TimeZone): Instant =
         when (this) {
-            is EventSpan.Timed -> EventSpan.Timed(start = start, end = end)
-            is EventSpan.AllDay -> EventSpan.AllDay(start = start, end = end)
+            is EventSpan.Timed -> start
+            is EventSpan.AllDay -> startDate.atStartOfDayIn(timeZone)
+        }
+
+    private fun EventSpan.endInstant(timeZone: TimeZone): Instant =
+        when (this) {
+            is EventSpan.Timed -> end
+            is EventSpan.AllDay -> endDate.plus(1, DateTimeUnit.DAY).atStartOfDayIn(timeZone)
+        }
+
+    private fun Instant.shifted(
+        frequency: Frequency,
+        steps: Int,
+        timeZone: TimeZone,
+    ): Instant =
+        when (frequency) {
+            Frequency.Daily -> plus(steps, DateTimeUnit.DAY, timeZone)
+            Frequency.Weekly -> plus(steps * 7, DateTimeUnit.DAY, timeZone)
+            Frequency.Monthly -> plus(steps, DateTimeUnit.MONTH, timeZone)
+            Frequency.Yearly -> plus(steps, DateTimeUnit.YEAR, timeZone)
+        }
+
+    private fun LocalDate.shifted(frequency: Frequency, steps: Int): LocalDate =
+        when (frequency) {
+            Frequency.Daily -> plus(steps, DateTimeUnit.DAY)
+            Frequency.Weekly -> plus(steps * 7, DateTimeUnit.DAY)
+            Frequency.Monthly -> plus(steps, DateTimeUnit.MONTH)
+            Frequency.Yearly -> plus(steps, DateTimeUnit.YEAR)
         }
 
     private fun CalendarEvent.toScheduled(span: EventSpan): ScheduledEvent =

@@ -2,6 +2,7 @@ package com.felix.livinglink.calendar.delivery.mcp.dto
 
 import com.felix.livinglink.calendar.domain.EventSpan
 import com.felix.livinglink.core.delivery.mcp.dsl.parseInstant
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
@@ -25,17 +26,30 @@ sealed interface EventSpanMcpDto {
             )
     }
 
+    /**
+     * Timezone-independent all-day span. [startDate] and [endDate] are
+     * inclusive ISO 8601 dates (e.g. "2026-05-24").
+     */
     @Serializable
     @SerialName("allDay")
     data class AllDay(
-        val start: String,
-        val end: String,
+        val startDate: String,
+        val endDate: String,
     ) : EventSpanMcpDto {
         override fun toDomain(): EventSpan =
             EventSpan.AllDay(
-                start = parseInstant("span.start", start),
-                end = parseInstant("span.end", end),
+                startDate = parseLocalDateOrFail("span.startDate", startDate),
+                endDate = parseLocalDateOrFail("span.endDate", endDate),
             )
+
+        private fun parseLocalDateOrFail(name: String, value: String): LocalDate =
+            try {
+                LocalDate.parse(value.trim())
+            } catch (_: Exception) {
+                throw IllegalArgumentException(
+                    "'$name' must be a valid ISO 8601 date, e.g. '2026-05-24'. Got: '$value'.",
+                )
+            }
     }
 
     companion object {
@@ -46,10 +60,11 @@ sealed interface EventSpanMcpDto {
                         start = span.start.toString(),
                         end = span.end.toString(),
                     )
+
                 is EventSpan.AllDay ->
                     AllDay(
-                        start = span.start.toString(),
-                        end = span.end.toString(),
+                        startDate = span.startDate.toString(),
+                        endDate = span.endDate.toString(),
                     )
             }
     }

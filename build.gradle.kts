@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.koin.annotations)
     implementation(libs.mongodb.driver.kotlin.coroutine)
     implementation(libs.ktor.server.cio)
+    implementation(libs.kotlinx.datetime)
 
     testImplementation(libs.kotlin.test)
     testImplementation(libs.coroutines.test)

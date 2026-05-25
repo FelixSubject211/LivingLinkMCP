@@ -18,6 +18,8 @@ object MongoCalendarEventFields {
         const val TYPE = "type"
         const val START = "start"
         const val END = "end"
+        const val START_DATE = "startDate"
+        const val END_DATE = "endDate"
     }
 
     object Recurrence {

@@ -1,5 +1,6 @@
 package com.felix.livinglink.calendar.domain
 
+import kotlinx.datetime.TimeZone
 import kotlin.time.Instant
 
 interface ScheduledEventCalculator {
@@ -7,5 +8,6 @@ interface ScheduledEventCalculator {
         event: CalendarEvent,
         from: Instant,
         to: Instant,
+        timeZone: TimeZone,
     ): List<ScheduledEvent>
 }
