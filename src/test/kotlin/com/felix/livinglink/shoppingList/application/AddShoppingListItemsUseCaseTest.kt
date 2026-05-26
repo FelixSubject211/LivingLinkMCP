@@ -35,7 +35,6 @@ class AddShoppingListItemsUseCaseTest {
     @Test
     fun `creates one item per name with correct mapping`() =
         runTest {
-            // given
             every { uuidGenerator() } sequentially {
                 returns("id-1")
                 returns("id-2")
@@ -51,7 +50,6 @@ class AddShoppingListItemsUseCaseTest {
 
             everySuspend { repository.create(any()) } calls { (item: ShoppingListItem) -> item }
 
-            // when
             val result =
                 useCase(
                     AddShoppingListItemsUseCase.Input(
@@ -60,7 +58,6 @@ class AddShoppingListItemsUseCaseTest {
                     ),
                 )
 
-            // then
             val expected =
                 listOf(
                     shoppingListItem(

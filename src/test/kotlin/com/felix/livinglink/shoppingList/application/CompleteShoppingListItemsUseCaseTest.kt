@@ -48,13 +48,11 @@ class CompleteShoppingListItemsUseCaseTest {
     @Test
     fun `completed items land in completedItems`() =
         runTest {
-            // given
             every { timeProvider() } returns now
             repository.stubUpdates(id = "id-1", currentItem = openItem)
 
             val expectedCompleted = openItem.complete(byUserId = "user-1", at = now)
 
-            // when
             val result =
                 useCase(
                     CompleteShoppingListItemsUseCase.Input(
@@ -63,7 +61,6 @@ class CompleteShoppingListItemsUseCaseTest {
                     ),
                 )
 
-            // then
             assertEquals(
                 CompleteShoppingListItemsUseCase.Output(
                     completedItems = listOf(expectedCompleted),
@@ -78,11 +75,9 @@ class CompleteShoppingListItemsUseCaseTest {
     @Test
     fun `already completed items land in alreadyCompletedItems`() =
         runTest {
-            // given
             every { timeProvider() } returns now
             repository.stubDoesNotUpdate(id = "id-1", currentItem = completedItem)
 
-            // when
             val result =
                 useCase(
                     CompleteShoppingListItemsUseCase.Input(
@@ -91,7 +86,6 @@ class CompleteShoppingListItemsUseCaseTest {
                     ),
                 )
 
-            // then
             assertEquals(
                 CompleteShoppingListItemsUseCase.Output(
                     completedItems = emptyList(),
@@ -106,10 +100,8 @@ class CompleteShoppingListItemsUseCaseTest {
     @Test
     fun `missing items land in missingIds`() =
         runTest {
-            // given
             repository.stubNotFound<ShoppingListItem>(id = "id-1")
 
-            // when
             val result =
                 useCase(
                     CompleteShoppingListItemsUseCase.Input(
@@ -118,7 +110,6 @@ class CompleteShoppingListItemsUseCaseTest {
                     ),
                 )
 
-            // then
             assertEquals(
                 CompleteShoppingListItemsUseCase.Output(
                     completedItems = emptyList(),
@@ -133,10 +124,8 @@ class CompleteShoppingListItemsUseCaseTest {
     @Test
     fun `conflicted items land in conflictedIds`() =
         runTest {
-            // given
             repository.stubConflict<ShoppingListItem>(id = "id-1")
 
-            // when
             val result =
                 useCase(
                     CompleteShoppingListItemsUseCase.Input(
@@ -145,7 +134,6 @@ class CompleteShoppingListItemsUseCaseTest {
                     ),
                 )
 
-            // then
             assertEquals(
                 CompleteShoppingListItemsUseCase.Output(
                     completedItems = emptyList(),

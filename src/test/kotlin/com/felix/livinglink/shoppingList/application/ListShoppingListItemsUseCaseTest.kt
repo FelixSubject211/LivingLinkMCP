@@ -27,7 +27,6 @@ class ListShoppingListItemsUseCaseTest {
     @Test
     fun `passes the query to the repository and returns its result`() =
         runTest {
-            // given
             val query =
                 ShoppingListItemQuery(
                     completed = false,
@@ -37,13 +36,11 @@ class ListShoppingListItemsUseCaseTest {
 
             everySuspend { repository.find(query) } returns listOf(item1, item2)
 
-            // when
             val result =
                 useCase(
                     ListShoppingListItemsUseCase.Input(query = query),
                 )
 
-            // then
             assertEquals(
                 ListShoppingListItemsUseCase.Output(items = listOf(item1, item2)),
                 result,
