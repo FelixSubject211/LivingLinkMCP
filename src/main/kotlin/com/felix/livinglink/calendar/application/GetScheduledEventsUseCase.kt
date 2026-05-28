@@ -17,7 +17,7 @@ import org.koin.core.annotation.Single
 import kotlin.time.Instant
 
 @Single
-class ListCalendarEventsUseCase(
+class GetScheduledEventsUseCase(
     private val calendarEventRepository: CalendarEventRepository,
     private val scheduledEventCalculator: ScheduledEventCalculator,
 ) {

@@ -1,6 +1,6 @@
 package com.felix.livinglink.calendar.delivery.mcp.tools
 
-import com.felix.livinglink.calendar.application.ListCalendarEventsUseCase
+import com.felix.livinglink.calendar.application.GetScheduledEventsUseCase
 import com.felix.livinglink.calendar.delivery.mcp.dto.CalendarEventSortMcpDto
 import com.felix.livinglink.calendar.delivery.mcp.dto.ScheduledEventDetailMcpDto
 import com.felix.livinglink.calendar.delivery.mcp.dto.toMcpDetailDto
@@ -18,8 +18,8 @@ import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
 
 @Single(binds = [McpToolRegistrar::class])
-class ListCalendarEventsTool(
-    private val listCalendarEventsUseCase: ListCalendarEventsUseCase,
+class GetScheduledEventsTool(
+    private val getScheduledEventsUseCase: GetScheduledEventsUseCase,
     private val userLookup: UserLookup,
     private val timezoneSettings: TimezoneSettings,
     private val knownUsersDescriptionProvider: KnownUsersDescriptionProvider,
@@ -71,8 +71,8 @@ class ListCalendarEventsTool(
 
             handle {
                 val output =
-                    listCalendarEventsUseCase(
-                        ListCalendarEventsUseCase.Input(
+                    getScheduledEventsUseCase(
+                        GetScheduledEventsUseCase.Input(
                             query =
                                 CalendarEventQuery(
                                     from = from(),
