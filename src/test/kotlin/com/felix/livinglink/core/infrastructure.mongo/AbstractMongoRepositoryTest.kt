@@ -20,10 +20,11 @@ abstract class AbstractMongoRepositoryTest {
 
     @BeforeTest
     fun setUpMongo() {
-        System.setProperty("LIVINGLINK_MONGO_CONNECTION_STRING", mongoContainer.replicaSetUrl)
-        System.setProperty("LIVINGLINK_MONGO_DATABASE", "livinglink_test")
-
-        val testSettings = MongoSettings()
+        val testSettings =
+            MongoSettings(
+                connectionString = mongoContainer.replicaSetUrl,
+                databaseName = "livinglink_test",
+            )
         clientProvider = MongoClientProvider(testSettings)
         database = clientProvider.database()
     }
@@ -33,7 +34,5 @@ abstract class AbstractMongoRepositoryTest {
         if (::clientProvider.isInitialized) {
             clientProvider.close()
         }
-        System.clearProperty("LIVINGLINK_MONGO_CONNECTION_STRING")
-        System.clearProperty("LIVINGLINK_MONGO_DATABASE")
     }
 }

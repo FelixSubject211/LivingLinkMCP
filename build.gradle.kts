@@ -40,7 +40,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-
-    environment("LIVINGLINK_MONGO_CONNECTION_STRING", "mongodb://localhost:27017")
-    environment("LIVINGLINK_MONGO_DATABASE", "dummy")
 }
