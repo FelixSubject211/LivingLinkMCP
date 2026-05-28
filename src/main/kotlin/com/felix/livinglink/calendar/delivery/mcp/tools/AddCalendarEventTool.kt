@@ -53,7 +53,7 @@ class AddCalendarEventTool(
                 )
 
             val participantUserIds =
-                optional<List<String>>(
+                optional<Set<String>>(
                     name = "participantUserIds",
                     description =
                         knownUsersDescriptionProvider.describeWith(

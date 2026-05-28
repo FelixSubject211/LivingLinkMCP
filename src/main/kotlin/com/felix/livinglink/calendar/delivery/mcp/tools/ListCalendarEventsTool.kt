@@ -45,7 +45,7 @@ class ListCalendarEventsTool(
                 )
 
             val participantUserIds =
-                optional<List<String>>(
+                optional<Set<String>>(
                     name = "participantUserIds",
                     description =
                         knownUsersDescriptionProvider.describeWith(
@@ -54,7 +54,7 @@ class ListCalendarEventsTool(
                 )
 
             val createdByUserIds =
-                optional<List<String>>(
+                optional<Set<String>>(
                     name = "createdByUserIds",
                     description =
                         knownUsersDescriptionProvider.describeWith(

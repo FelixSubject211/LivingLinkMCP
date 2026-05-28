@@ -26,10 +26,6 @@ sealed interface EventSpanMcpDto {
             )
     }
 
-    /**
-     * Timezone-independent all-day span. [startDate] and [endDate] are
-     * inclusive ISO 8601 dates (e.g. "2026-05-24").
-     */
     @Serializable
     @SerialName("allDay")
     data class AllDay(
