@@ -22,13 +22,19 @@ data class ShoppingListItem(
             }
 
     fun complete(byUserId: String, at: Instant): ShoppingListItem =
+        addCompletedEvent(value = true, byUserId = byUserId, at = at)
+
+    fun unComplete(byUserId: String, at: Instant): ShoppingListItem =
+        addCompletedEvent(value = false, byUserId = byUserId, at = at)
+
+    private fun addCompletedEvent(value: Boolean, byUserId: String, at: Instant): ShoppingListItem =
         copy(
             updatedAt = at,
             completionEvents =
                 completionEvents +
                     CompletionEvent(
                         byUserId = byUserId,
-                        completed = true,
+                        completed = value,
                         at = at,
                     ),
         )

@@ -82,4 +82,37 @@ class ShoppingListItemTest {
 
         assertEquals(expected, completed)
     }
+
+    @Test
+    fun `unComplete appends an uncompletion event, updates updatedAt, keeps everything else`() {
+        val original =
+            shoppingListItem(
+                id = "id-1",
+                name = "Milk",
+                createdByUserId = "creator",
+                createdAt = t0,
+                updatedAt = t0,
+                version = 7L,
+                completionEvents =
+                    listOf(
+                        completionEvent(byUserId = "user-a", at = t0, completed = true),
+                    ),
+            )
+
+        val unCompleted = original.unComplete(byUserId = "user-b", at = t0 + 1.hours)
+
+        val expected =
+            original.copy(
+                updatedAt = t0 + 1.hours,
+                completionEvents =
+                    original.completionEvents +
+                        ShoppingListItem.CompletionEvent(
+                            byUserId = "user-b",
+                            completed = false,
+                            at = t0 + 1.hours,
+                        ),
+            )
+
+        assertEquals(expected, unCompleted)
+    }
 }
