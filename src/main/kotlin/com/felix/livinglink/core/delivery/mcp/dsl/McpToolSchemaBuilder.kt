@@ -148,6 +148,12 @@ object McpToolSchemaBuilder {
                     put("items", schemaFor(descriptor.getElementDescriptor(0)))
                 }
 
+            StructureKind.MAP ->
+                buildJsonObject {
+                    put("type", "object")
+                    put("additionalProperties", schemaFor(descriptor.getElementDescriptor(1)))
+                }
+
             StructureKind.CLASS ->
                 buildJsonObject {
                     put("type", "object")
