@@ -5,6 +5,8 @@ interface CrudRepository<T> {
 
     suspend fun findById(id: String): T?
 
+    suspend fun deleteById(id: String): DeleteResult
+
     suspend fun <TResponse> updateWithOptimisticLocking(
         id: String,
         modify: (T) -> UpdateOperationResult<T, TResponse>,
@@ -43,4 +45,10 @@ sealed class UpdateResult<out T, out TResponse> {
     data object OptimisticLockingError : UpdateResult<Nothing, Nothing>()
 
     data object NotFound : UpdateResult<Nothing, Nothing>()
+}
+
+sealed class DeleteResult {
+    data object Deleted : DeleteResult()
+
+    data object NotFound : DeleteResult()
 }

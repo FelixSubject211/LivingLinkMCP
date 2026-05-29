@@ -15,6 +15,10 @@ class MappedCrudRepository<TDomain, TStorage>(
             .findById(id)
             ?.let(toDomain)
 
+    override suspend fun deleteById(id: String): DeleteResult =
+        storageRepository
+            .deleteById(id)
+
     override suspend fun <TResponse> updateWithOptimisticLocking(
         id: String,
         modify: (TDomain) -> UpdateOperationResult<TDomain, TResponse>,

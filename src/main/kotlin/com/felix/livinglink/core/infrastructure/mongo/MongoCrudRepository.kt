@@ -1,6 +1,7 @@
 package com.felix.livinglink.core.infrastructure.mongo
 
 import com.felix.livinglink.core.domain.CrudRepository
+import com.felix.livinglink.core.domain.DeleteResult
 import com.felix.livinglink.core.domain.UpdateOperationResult
 import com.felix.livinglink.core.domain.UpdateResult
 import com.mongodb.client.model.Filters.and
@@ -32,6 +33,16 @@ class MongoCrudRepository<TDocument : MongoVersionedDocument<TDocument>>(
         collection
             .find(eq("_id", id))
             .firstOrNull()
+
+    override suspend fun deleteById(id: String): DeleteResult {
+        val result = collection.deleteOne(eq("_id", id))
+
+        return if (result.deletedCount == 0L) {
+            DeleteResult.NotFound
+        } else {
+            DeleteResult.Deleted
+        }
+    }
 
     override suspend fun <TResponse> updateWithOptimisticLocking(
         id: String,

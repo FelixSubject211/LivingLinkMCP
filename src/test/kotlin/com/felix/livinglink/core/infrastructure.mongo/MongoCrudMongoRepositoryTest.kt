@@ -1,5 +1,6 @@
 package com.felix.livinglink.core.infrastructure.mongo
 
+import com.felix.livinglink.core.domain.DeleteResult
 import com.felix.livinglink.core.domain.UpdateOperationResult
 import com.felix.livinglink.core.domain.UpdateResult
 import com.mongodb.kotlin.client.coroutine.MongoCollection
@@ -103,6 +104,50 @@ class MongoCrudMongoRepositoryTest : AbstractMongoRepositoryTest() {
                 }
 
             assertEquals(UpdateResult.OptimisticLockingError, result)
+        }
+
+    @Test
+    fun `should delete document by id`() =
+        runTest {
+            val documentToDelete =
+                FakeLockingDocument(
+                    id = "delete-id",
+                    name = "New Document",
+                    version = 0L,
+                )
+
+            val documentToNotDelete =
+                FakeLockingDocument(
+                    id = "not-delete-id",
+                    name = "New Document",
+                    version = 0L,
+                )
+
+            repository.create(documentToDelete)
+            repository.create(documentToNotDelete)
+
+            val deleteResult = repository.deleteById("delete-id")
+            assertEquals(DeleteResult.Deleted, deleteResult)
+            assertNull(repository.findById("delete-id"))
+            assertEquals(documentToNotDelete, repository.findById("not-delete-id"))
+        }
+
+    @Test
+    fun `should return NotFound when deleting non existing document`() =
+        runTest {
+            val documentToNotDelete =
+                FakeLockingDocument(
+                    id = "not-delete-id",
+                    name = "New Document",
+                    version = 0L,
+                )
+
+            repository.create(documentToNotDelete)
+
+            val result = repository.deleteById("does-not-exist")
+
+            assertEquals(DeleteResult.NotFound, result)
+            assertEquals(documentToNotDelete, repository.findById("not-delete-id"))
         }
 }
 
