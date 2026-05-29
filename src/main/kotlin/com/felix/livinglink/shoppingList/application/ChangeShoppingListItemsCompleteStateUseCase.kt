@@ -5,6 +5,9 @@ import com.felix.livinglink.core.domain.UpdateOperationResult
 import com.felix.livinglink.core.domain.UpdateResult
 import com.felix.livinglink.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shoppingList.domain.ShoppingListItemRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.koin.core.annotation.Single
 
 @Single
@@ -12,54 +15,72 @@ class ChangeShoppingListItemsCompleteStateUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
     private val timeProvider: TimeProvider,
 ) {
-    suspend operator fun invoke(input: Input): Output {
-        val results =
-            input.idsToCompleteState.map { (id, completeAction) ->
-                val result =
-                    shoppingListItemRepository.updateWithOptimisticLocking(id) { current ->
-                        when (completeAction) {
-                            true -> {
-                                if (current.isCompleted) {
-                                    UpdateOperationResult.noUpdate(current = current)
-                                } else {
-                                    val completed =
-                                        current.complete(
-                                            byUserId = input.byUserId,
-                                            at = timeProvider(),
-                                        )
-                                    UpdateOperationResult.updated(newEntity = completed)
+    suspend operator fun invoke(input: Input): Output =
+        coroutineScope {
+            val results =
+                input.idsToCompleteState
+                    .map { (id, completeAction) ->
+                        async {
+                            val result =
+                                shoppingListItemRepository.updateWithOptimisticLocking(id) { current ->
+                                    when (completeAction) {
+                                        true -> {
+                                            if (current.isCompleted) {
+                                                UpdateOperationResult.noUpdate(current = current)
+                                            } else {
+                                                val completed =
+                                                    current.complete(
+                                                        byUserId = input.byUserId,
+                                                        at = timeProvider(),
+                                                    )
+                                                UpdateOperationResult.updated(newEntity = completed)
+                                            }
+                                        }
+                                        false -> {
+                                            if (!current.isCompleted) {
+                                                UpdateOperationResult.noUpdate(current = current)
+                                            } else {
+                                                val unCompleted =
+                                                    current.unComplete(
+                                                        byUserId = input.byUserId,
+                                                        at = timeProvider(),
+                                                    )
+                                                UpdateOperationResult.updated(newEntity = unCompleted)
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-                            false -> {
-                                if (!current.isCompleted) {
-                                    UpdateOperationResult.noUpdate(current = current)
-                                } else {
-                                    val unCompleted =
-                                        current.unComplete(
-                                            byUserId = input.byUserId,
-                                            at = timeProvider(),
-                                        )
-                                    UpdateOperationResult.updated(newEntity = unCompleted)
-                                }
+
+                            when (result) {
+                                is UpdateResult.NotFound -> ItemResult.Missing(id)
+                                is UpdateResult.OptimisticLockingError -> ItemResult.Conflict(id)
+                                is UpdateResult.NotUpdated -> ItemResult.AlreadyChanged(result.response)
+                                is UpdateResult.Updated -> ItemResult.Changed(result.newEntity)
                             }
                         }
-                    }
+                    }.awaitAll()
 
+            val changedItems = mutableListOf<ShoppingListItem>()
+            val alreadyChangedItems = mutableListOf<ShoppingListItem>()
+            val missingIds = mutableListOf<String>()
+            val conflictedIds = mutableListOf<String>()
+
+            results.forEach { result ->
                 when (result) {
-                    is UpdateResult.NotFound -> ItemResult.Missing(id)
-                    is UpdateResult.OptimisticLockingError -> ItemResult.Conflict(id)
-                    is UpdateResult.NotUpdated -> ItemResult.AlreadyChanged(result.response)
-                    is UpdateResult.Updated -> ItemResult.Changed(result.newEntity)
+                    is ItemResult.Changed -> changedItems += result.item
+                    is ItemResult.AlreadyChanged -> alreadyChangedItems += result.item
+                    is ItemResult.Missing -> missingIds += result.id
+                    is ItemResult.Conflict -> conflictedIds += result.id
                 }
             }
 
-        return Output(
-            changedItems = results.filterIsInstance<ItemResult.Changed>().map { it.item },
-            alreadyChangedItems = results.filterIsInstance<ItemResult.AlreadyChanged>().map { it.item },
-            missingIds = results.filterIsInstance<ItemResult.Missing>().map { it.id },
-            conflictedIds = results.filterIsInstance<ItemResult.Conflict>().map { it.id },
-        )
-    }
+            Output(
+                changedItems = changedItems,
+                alreadyChangedItems = alreadyChangedItems,
+                missingIds = missingIds,
+                conflictedIds = conflictedIds,
+            )
+        }
 
     private sealed class ItemResult {
         data class Changed(
