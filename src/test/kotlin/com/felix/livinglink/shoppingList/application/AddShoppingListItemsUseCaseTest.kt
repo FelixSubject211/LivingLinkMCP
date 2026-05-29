@@ -21,13 +21,13 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
 class AddShoppingListItemsUseCaseTest {
-    private val repository = mock<ShoppingListItemRepository>()
+    private val shoppingListItemRepository = mock<ShoppingListItemRepository>()
     private val uuidGenerator = mock<UuidGenerator>()
     private val timeProvider = mock<TimeProvider>()
 
     private val useCase =
         AddShoppingListItemsUseCase(
-            shoppingListItemRepository = repository,
+            shoppingListItemRepository = shoppingListItemRepository,
             uuidGenerator = uuidGenerator,
             timeProvider = timeProvider,
         )
@@ -48,7 +48,7 @@ class AddShoppingListItemsUseCaseTest {
                 returns(time2)
             }
 
-            everySuspend { repository.create(any()) } calls { (item: ShoppingListItem) -> item }
+            everySuspend { shoppingListItemRepository.create(any()) } calls { (item: ShoppingListItem) -> item }
 
             val result =
                 useCase(
@@ -78,6 +78,6 @@ class AddShoppingListItemsUseCaseTest {
 
             assertEquals(expected, result.items)
 
-            verifySuspend(exactly(2)) { repository.create(any()) }
+            verifySuspend(exactly(2)) { shoppingListItemRepository.create(any()) }
         }
 }

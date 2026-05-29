@@ -20,12 +20,12 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
 class ChangeShoppingListItemsCompleteStateUseCaseTest {
-    private val repository = mock<ShoppingListItemRepository>()
+    private val shoppingListItemRepository = mock<ShoppingListItemRepository>()
     private val timeProvider = mock<TimeProvider>()
 
     private val useCase =
         ChangeShoppingListItemsCompleteStateUseCase(
-            shoppingListItemRepository = repository,
+            shoppingListItemRepository = shoppingListItemRepository,
             timeProvider = timeProvider,
         )
 
@@ -50,7 +50,7 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
         runTest {
             every { timeProvider() } returns now
 
-            repository.stubUpdates(
+            shoppingListItemRepository.stubUpdates(
                 id = "id-1",
                 currentItem = openItem,
             )
@@ -88,7 +88,7 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
         runTest {
             every { timeProvider() } returns now
 
-            repository.stubUpdates(
+            shoppingListItemRepository.stubUpdates(
                 id = "id-1",
                 currentItem = completedItem,
             )
@@ -124,7 +124,7 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
     @Test
     fun `already completed items land in alreadyChangedItems`() =
         runTest {
-            repository.stubDoesNotUpdate(
+            shoppingListItemRepository.stubDoesNotUpdate(
                 id = "id-1",
                 currentItem = completedItem,
             )
@@ -154,7 +154,7 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
     @Test
     fun `already uncompleted items land in alreadyChangedItems`() =
         runTest {
-            repository.stubDoesNotUpdate(
+            shoppingListItemRepository.stubDoesNotUpdate(
                 id = "id-1",
                 currentItem = openItem,
             )
@@ -184,7 +184,7 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
     @Test
     fun `missing items land in missingIds`() =
         runTest {
-            repository.stubNotFound<ShoppingListItem>(id = "id-1")
+            shoppingListItemRepository.stubNotFound<ShoppingListItem>(id = "id-1")
 
             val result =
                 useCase(
@@ -211,7 +211,7 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
     @Test
     fun `conflicted items land in conflictedIds`() =
         runTest {
-            repository.stubConflict<ShoppingListItem>(id = "id-1")
+            shoppingListItemRepository.stubConflict<ShoppingListItem>(id = "id-1")
 
             val result =
                 useCase(

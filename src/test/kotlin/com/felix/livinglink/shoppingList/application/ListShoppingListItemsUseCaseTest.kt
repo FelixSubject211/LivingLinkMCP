@@ -14,11 +14,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ListShoppingListItemsUseCaseTest {
-    private val repository = mock<ShoppingListItemRepository>()
+    private val shoppingListItemRepository = mock<ShoppingListItemRepository>()
 
     private val useCase =
         ListShoppingListItemsUseCase(
-            shoppingListItemRepository = repository,
+            shoppingListItemRepository = shoppingListItemRepository,
         )
 
     private val item1 = shoppingListItem(id = "id-1", name = "Milk")
@@ -34,7 +34,7 @@ class ListShoppingListItemsUseCaseTest {
                     sort = ShoppingListItemSort.NameAscending,
                 )
 
-            everySuspend { repository.find(query) } returns listOf(item1, item2)
+            everySuspend { shoppingListItemRepository.find(query) } returns listOf(item1, item2)
 
             val result =
                 useCase(
@@ -46,6 +46,6 @@ class ListShoppingListItemsUseCaseTest {
                 result,
             )
 
-            verifySuspend(exactly(1)) { repository.find(query) }
+            verifySuspend(exactly(1)) { shoppingListItemRepository.find(query) }
         }
 }
