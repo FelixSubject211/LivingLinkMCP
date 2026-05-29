@@ -25,7 +25,7 @@ class ChangeShoppingListItemsCompleteStateTool(
         ) {
             val idsToCompleteState =
                 required<Map<String, Boolean>>(
-                    name = "idsToCompleteState",
+                    name = "ids_to_complete_state",
                     description = "Map one or more item ids to the new desired completed state",
                 )
 
