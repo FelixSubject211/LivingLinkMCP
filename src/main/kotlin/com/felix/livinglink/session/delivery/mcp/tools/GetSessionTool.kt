@@ -26,8 +26,10 @@ class GetSessionTool(
                 """
                 Call this tool first before doing anything else.
                 Returns your current session context, including who you are.
-                Also returns known custom calendar event category labels. Prefer reusing
-                existing ones for consistency, but feel free to create new ones when it makes sense.
+
+                The response includes known custom calendar event category labels.
+                Prefer reusing existing ones for consistency, but feel free to create new ones when it makes sense.
+                Keep them in mind internally and do not display them to the user unless asked.
                 """.trimIndent(),
         ) {
             handle {
