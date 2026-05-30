@@ -1,7 +1,6 @@
-package com.felix.livinglink.user.delivery.mcp
+package com.felix.livinglink.user.config
 
 import com.felix.livinglink.core.config.McpApiKeySettings
-import com.felix.livinglink.core.config.McpRequestUser
 import com.felix.livinglink.core.config.McpStdioUserSettings
 import com.felix.livinglink.core.config.McpTransport
 import com.felix.livinglink.core.config.McpTransportSettings
@@ -33,10 +32,4 @@ class EnvUserLookup(
                         user.toDomain()
                     }
         }
-
-    private fun McpRequestUser.toDomain(): User =
-        User(
-            id = id,
-            username = username,
-        )
 }

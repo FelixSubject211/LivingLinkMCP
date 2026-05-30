@@ -10,7 +10,6 @@ import com.felix.livinglink.core.config.TimezoneSettings
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
-import com.felix.livinglink.user.delivery.mcp.KnownUsersDescriptionProvider
 import com.felix.livinglink.user.delivery.mcp.resolveUsers
 import com.felix.livinglink.user.domain.UserLookup
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -22,7 +21,6 @@ class GetScheduledEventsTool(
     private val getScheduledEventsUseCase: GetScheduledEventsUseCase,
     private val userLookup: UserLookup,
     private val timezoneSettings: TimezoneSettings,
-    private val knownUsersDescriptionProvider: KnownUsersDescriptionProvider,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -47,19 +45,13 @@ class GetScheduledEventsTool(
             val participantUserIds =
                 optional<Set<String>>(
                     name = "participantUserIds",
-                    description =
-                        knownUsersDescriptionProvider.describeWith(
-                            "Filter: only events with at least one of these participants.",
-                        ),
+                    description = "Filter: only events with at least one of these participants. Use user IDs from get_session.",
                 )
 
             val createdByUserIds =
                 optional<Set<String>>(
                     name = "createdByUserIds",
-                    description =
-                        knownUsersDescriptionProvider.describeWith(
-                            "Filter: only events created by one of these users.",
-                        ),
+                    description = "Filter: only events created by one of these users. Use user IDs from get_session.",
                 )
 
             val sort =
