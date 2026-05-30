@@ -10,6 +10,7 @@ import com.mongodb.client.model.Filters
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.bson.conversions.Bson
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -52,4 +53,12 @@ class MongoCalendarEventRepository(
             .find(Filters.and(filters))
             .map { it.toDomain() }
     }
+
+    override suspend fun findDistinctCustomCategoryLabels(): List<String> =
+        collection
+            .distinct<String>(
+                fieldName = "${Fields.CATEGORY}.${Fields.Category.LABEL}",
+                filter = Filters.eq("${Fields.CATEGORY}.${Fields.Category.TYPE}", MongoCalendarEventDocument.Category.TYPE_CUSTOM),
+            ).toList()
+            .sorted()
 }

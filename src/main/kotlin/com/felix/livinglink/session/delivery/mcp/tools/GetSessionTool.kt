@@ -1,5 +1,6 @@
 package com.felix.livinglink.session.delivery.mcp.tools
 
+import com.felix.livinglink.calendar.application.GetEventCategoriesUseCase
 import com.felix.livinglink.core.config.McpRequestUser
 import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
@@ -13,6 +14,7 @@ import org.koin.core.annotation.Single
 @Single(binds = [McpToolRegistrar::class])
 class GetSessionTool(
     private val userDirectory: UserDirectory,
+    private val getEventCategoriesUseCase: GetEventCategoriesUseCase,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -23,11 +25,14 @@ class GetSessionTool(
             description =
                 """
                 Call this tool first before doing anything else.
-                Returns your current session context, including who you are
+                Returns your current session context, including who you are.
+                Also returns known custom calendar event category labels. Prefer reusing
+                existing ones for consistency, but feel free to create new ones when it makes sense.
                 """.trimIndent(),
         ) {
             handle {
                 val allUsers = userDirectory.all()
+                val categoriesOutput = getEventCategoriesUseCase()
 
                 success(
                     Output(
@@ -40,6 +45,7 @@ class GetSessionTool(
                             allUsers
                                 .filter { it.id != user.id }
                                 .map { u -> UserMcpDto(id = u.id, username = u.username) },
+                        knownCustomEventCategoryLabels = categoriesOutput.knownCustomLabels,
                     ),
                 )
             }
@@ -50,5 +56,6 @@ class GetSessionTool(
     private data class Output(
         val currentUser: UserMcpDto,
         val availableUsers: List<UserMcpDto>,
+        val knownCustomEventCategoryLabels: List<String>,
     )
 }

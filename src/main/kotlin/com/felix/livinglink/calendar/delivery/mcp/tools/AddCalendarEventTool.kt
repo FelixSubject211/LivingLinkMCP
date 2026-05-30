@@ -59,7 +59,7 @@ class AddCalendarEventTool(
             val category =
                 optional<EventCategoryMcpDto>(
                     name = "category",
-                    description = "Optional category: type='none', type='custom' with a label, or type='shopping' with shoppingListItemIds.",
+                    description = "Optional category. For type='custom', see get_session for known labels.",
                     default = EventCategoryMcpDto.None,
                 )
 

@@ -264,6 +264,34 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
             assertEquals(listOf(event), result)
         }
 
+    @Test
+    fun `findDistinctCustomCategoryLabels returns sorted distinct labels of custom categories`() =
+        runTest {
+            insert(
+                timedEvent(id = "1", start = t0, end = t0 + 1.hours, category = EventCategory.Custom("Urlaub")),
+                timedEvent(id = "2", start = t0, end = t0 + 1.hours, category = EventCategory.Custom("Besuch")),
+                timedEvent(id = "3", start = t0, end = t0 + 1.hours, category = EventCategory.Custom("Urlaub")),
+                timedEvent(id = "4", start = t0, end = t0 + 1.hours, category = EventCategory.None),
+                timedEvent(id = "5", start = t0, end = t0 + 1.hours, category = EventCategory.Shopping(shoppingListItemIds = listOf("item-1"))),
+            )
+
+            val result = repository.findDistinctCustomCategoryLabels()
+
+            assertEquals(listOf("Besuch", "Urlaub"), result)
+        }
+
+    @Test
+    fun `findDistinctCustomCategoryLabels returns empty list when no custom categories exist`() =
+        runTest {
+            insert(
+                timedEvent(id = "1", start = t0, end = t0 + 1.hours, category = EventCategory.None),
+            )
+
+            val result = repository.findDistinctCustomCategoryLabels()
+
+            assertEquals(emptyList(), result)
+        }
+
     private suspend fun insert(vararg events: CalendarEvent) {
         collection.insertMany(
             events.map { MongoCalendarEventDocument.fromDomain(it) },
@@ -277,6 +305,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
         createdBy: String = "creator",
         participantIds: List<String> = emptyList(),
         recurrence: RecurrenceRule? = null,
+        category: EventCategory = EventCategory.None,
     ): CalendarEvent =
         CalendarEvent(
             id = id,
@@ -289,7 +318,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
                 participantIds.map { userId ->
                     Participant(userId = userId, rsvpEvents = emptyList())
                 },
-            category = EventCategory.None,
+            category = category,
             createdAt = start,
             updatedAt = start,
         )

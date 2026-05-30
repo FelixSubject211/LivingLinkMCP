@@ -7,7 +7,6 @@ import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlin.test.Test
 
 class FeatureBoundariesTest {
-
     private val core = Layer("Core", "com.felix.livinglink.core..")
     private val user = Layer("User", "com.felix.livinglink.user..")
     private val shoppingList = Layer("ShoppingList", "com.felix.livinglink.shoppingList..")
