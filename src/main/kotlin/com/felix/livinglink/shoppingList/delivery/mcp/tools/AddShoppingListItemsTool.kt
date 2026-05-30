@@ -5,6 +5,7 @@ import com.felix.livinglink.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.core.delivery.mcp.dsl.success
 import com.felix.livinglink.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.shoppingList.application.AddShoppingListItemsUseCase
+import com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemReferenceMcpDto
 import com.felix.livinglink.shoppingList.delivery.mcp.dto.toMcpReferenceDto
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.Serializable
@@ -49,6 +50,6 @@ class AddShoppingListItemsTool(
 
     @Serializable
     private data class Output(
-        val addedItems: List<com.felix.livinglink.shoppingList.delivery.mcp.dto.ShoppingListItemReferenceMcpDto>,
+        val addedItems: List<ShoppingListItemReferenceMcpDto>,
     )
 }

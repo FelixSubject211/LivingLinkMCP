@@ -23,7 +23,7 @@ class DeleteShoppingListItemsTool(
         ) {
             val idsToDelete =
                 required<Set<String>>(
-                    name = "ids_to_complete",
+                    name = "ids_to_delete",
                     description = "Deletes one or more shopping list items permanently",
                 )
 
