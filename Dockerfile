@@ -1,13 +1,22 @@
 # Dockerfile
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM eclipse-temurin:21-jdk AS build
+
+ENV ANDROID_HOME=/opt/android-sdk
+RUN apt-get update && apt-get install -y unzip wget && \
+mkdir -p ${ANDROID_HOME}/cmdline-tools && \
+wget -q https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip -O /tmp/cmdline.zip && \
+unzip -q /tmp/cmdline.zip -d ${ANDROID_HOME}/cmdline-tools && \
+mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest && \
+yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses && \
+${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
 WORKDIR /workspace
-
 COPY gradlew .
 COPY gradle gradle
 COPY gradle.properties .
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
+COPY build.gradle.kts settings.gradle.kts ./
+COPY gradle/libs.versions.toml gradle/libs.versions.toml
+COPY app app
 COPY server/build.gradle.kts server/build.gradle.kts
 COPY server/src server/src
 
