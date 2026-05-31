@@ -22,11 +22,13 @@ jobs:
               --env-file .env \
               -f docker-compose.yml \
               -f docker-compose.app.yml \
+              -f docker-compose.web.yml \
               -f docker-compose.cloudflare.yml \
               down
             docker compose \
               --env-file .env \
               -f docker-compose.yml \
               -f docker-compose.app.yml \
+              -f docker-compose.web.yml \
               -f docker-compose.cloudflare.yml \
               up --build -d
