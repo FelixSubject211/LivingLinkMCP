@@ -1,0 +1,62 @@
+package com.felix.livinglink.server.core.config
+
+import org.koin.core.annotation.Single
+
+@Single
+class McpApiKeySettings {
+    private val usersByApiKey: Map<String, McpRequestUser> by lazy {
+        Env
+            .required("LIVINGLINK_MCP_API_KEYS")
+            .split(",")
+            .associate { rawEntry ->
+                val parts =
+                    rawEntry
+                        .trim()
+                        .split(":", limit = 3)
+
+                require(parts.size == 3) {
+                    "Invalid LIVINGLINK_MCP_API_KEYS entry '$rawEntry'. Expected: userId:username:apiKey"
+                }
+
+                val userId = parts[0].trim()
+                val username = parts[1].trim()
+                val apiKey = parts[2].trim()
+
+                require(userId.isNotBlank()) {
+                    "Invalid LIVINGLINK_MCP_API_KEYS entry '$rawEntry': userId is blank."
+                }
+                require(username.isNotBlank()) {
+                    "Invalid LIVINGLINK_MCP_API_KEYS entry '$rawEntry': username is blank."
+                }
+                require(apiKey.isNotBlank()) {
+                    "Invalid LIVINGLINK_MCP_API_KEYS entry '$rawEntry': apiKey is blank."
+                }
+
+                apiKey to
+                    McpRequestUser(
+                        id = userId,
+                        username = username,
+                    )
+            }
+    }
+
+    private val usersById: Map<String, McpRequestUser> by lazy {
+        usersByApiKey.values.associateBy { user ->
+            user.id
+        }
+    }
+
+    fun userForApiKey(apiKey: String): McpRequestUser? =
+        usersByApiKey[apiKey]
+
+    fun usersByIds(ids: Set<String>): Map<String, McpRequestUser> =
+        ids
+            .mapNotNull { id ->
+                usersById[id]?.let { user ->
+                    id to user
+                }
+            }.toMap()
+
+    fun allUsers(): List<McpRequestUser> =
+        usersById.values.toList()
+}
