@@ -8,5 +8,9 @@ build/
 local.properties
 **/local.properties
 
+.kotlin/
+**/.kotlin/
+**/.klib/
+
 .env
 vsc.xml
